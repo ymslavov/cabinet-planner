@@ -119,20 +119,22 @@ function cabinet(id: string, toolId: string, x: number, z: number, shelf: number
   }
 }
 
+// Starting layout: mitre saw against the back wall (its wings run along X), table saw and
+// thicknesser with an outfeed cabinet behind each, sander and drill press out of every feed path.
 function seedCabinets(): Cabinet[] {
   return [
-    { ...cabinet('cab-gcm8', 'gcm8', -2300, 0, 320), name: 'Mitre saw base' },
-    { ...cabinet('cab-bts700', 'bts700', -1400, 0, 250), name: 'Sander base' },
-    { ...cabinet('cab-gts10', 'gts10', -300, 0, 200), name: 'Table saw base' },
-    { ...cabinet('cab-2012nb', '2012nb', 800, 0, 270), name: 'Thicknesser base' },
-    { ...cabinet('cab-pbd40', 'pbd40', 1600, 0, 320), name: 'Drill press base' },
+    { ...cabinet('cab-gcm8', 'gcm8', 0, -1800, 320), name: 'Mitre saw base' },
+    { ...cabinet('cab-bts700', 'bts700', -300, 900, 250), name: 'Sander base' },
+    { ...cabinet('cab-gts10', 'gts10', -1500, 0, 200), name: 'Table saw base' },
+    { ...cabinet('cab-2012nb', '2012nb', 1500, 0, 270), name: 'Thicknesser base' },
+    { ...cabinet('cab-pbd40', 'pbd40', 400, 900, 320), name: 'Drill press base' },
   ]
 }
 
 function seedFixtures(): Fixture[] {
   return [
-    { id: 'fx-outfeed-1', name: 'Outfeed cabinet 1', width: 1000, length: 600, height: 900, x: -300, z: -660, rotation: 0, measured: false },
-    { id: 'fx-outfeed-2', name: 'Outfeed cabinet 2', width: 1000, length: 600, height: 900, x: 800, z: -560, rotation: 0, measured: false },
+    { id: 'fx-outfeed-1', name: 'Outfeed cabinet 1', width: 1000, length: 600, height: 900, x: -1500, z: -660, rotation: 0, measured: false },
+    { id: 'fx-outfeed-2', name: 'Outfeed cabinet 2', width: 1000, length: 600, height: 900, x: 1500, z: -560, rotation: 0, measured: false },
   ]
 }
 

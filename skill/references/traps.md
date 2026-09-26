@@ -17,6 +17,7 @@ Things that cost time. Newest at the bottom. Each entry: symptom → cause → f
 - **Nester packed 2 pieces/sheet where 3 fit** → when opening a new sheet it took the first
   orientation that fit, not the best-scoring one → score orientations against the empty sheet
   with the same fit rule (`nest.ts`, new-sheet branch). Test: "kerf is respected".
-- **A `cat > file` without a heredoc in a Bash call hangs forever** waiting on stdin — when
-  printing debug output from vitest, write the throwaway test with a heredoc into
-  `tests/_tmp/` and delete it afterwards (vitest only picks up `tests/**/*.test.ts`).
+- **Debug `console.log` from a vitest test prints nothing** → vitest 5's default reporter
+  hides stdout of passing tests → run with `--reporter=verbose` (and `< /dev/null`). Put the
+  throwaway test in `tests/_tmp/` via a heredoc and delete it afterwards.
+- **A `cat > file` without a heredoc in a Bash call hangs forever** waiting on stdin.
