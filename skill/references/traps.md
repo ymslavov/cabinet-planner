@@ -21,3 +21,10 @@ Things that cost time. Newest at the bottom. Each entry: symptom → cause → f
   hides stdout of passing tests → run with `--reporter=verbose` (and `< /dev/null`). Put the
   throwaway test in `tests/_tmp/` via a heredoc and delete it afterwards.
 - **A `cat > file` without a heredoc in a Bash call hangs forever** waiting on stdin.
+
+## Tooling (Playwright)
+
+- **`npm run shot` fails with "Executable doesn't exist … chromium_headless_shell-NNNN"** →
+  the Playwright npm version wants a newer browser build than the cache holds → run
+  `npx playwright install chromium` once (≈95 MB).
+- The shot script launches Chromium with SwiftShader flags so WebGL renders headless.

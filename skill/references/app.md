@@ -47,3 +47,32 @@ zustand vanilla store + `persist`, exposed as `planStore` and the `usePlan(selec
   current plan untouched when it does.
 - Removing a tool sets `toolId: null` on its cabinets. Removing the selected object clears
   the selection. `reset()` restores the seed.
+
+## UI map (`src/ui/`)
+
+| Area | File | What it does |
+|---|---|---|
+| Header | `Header.tsx` | Title, tabs (Shop layout / Cut plan), the **tape** stock gauge, Export / Import / Reset |
+| Left | `Sidebar.tsx` | Cabinets (lettered A, B … = part-code prefix), existing furniture, tools, "Shop settings and stock", Checks (click a check to select its object) |
+| Centre | `three/LayoutView.tsx` / `cutplan/CutPlan.tsx` | Lazy-loaded per tab |
+| Right | `Inspector.tsx` | Form for the selection: cabinet, fixture, tool or settings |
+| Fields | `fields.tsx` | `NumberField` commits on blur/Enter, Escape reverts; `ConfirmButton` = click twice within 3 s (no dialogs anywhere) |
+
+- **The tape**: yellow tape-measure strip with one tick per sheet on hand; the dark hatched
+  fill is `sheetsFraction`. It turns red when the nest needs more sheets than you have.
+  Beneath: timber metres needed (and in stock, once entered).
+- **Size overrides**: cabinet width/depth/top fields are empty while they follow the tool
+  (computed value shown as a placeholder); typing a number overrides it (field turns yellow)
+  and "auto" clears the override.
+- **Keyboard**: R turns the selected cabinet/fixture 90°, Escape clears the selection
+  (ignored while typing in a field).
+- `useDerived()` (`src/useDerived.ts`) memoises `analyze()` on the four plan collections;
+  every panel reads from that one result.
+
+### Design language
+
+Concrete-grey ground, graphite ink, **tape-measure yellow `#F5B800` means "selected / measure /
+stock"** and nothing else; red-pen `#C63A2F` for errors. Barlow for UI, Barlow Condensed for
+headings and dimension labels, tabular figures everywhere. OSB `#C9A66B` and timber
+`#E3C592` are the material colours in the model and the diagrams. Sentence case, no
+all-caps labels.
