@@ -34,8 +34,9 @@ describe('plan store', () => {
 
   test('rotate steps through 90° increments', () => {
     const store = fresh()
+    const start = store.getState().cabinets.find((c) => c.id === 'cab-gts10')!.rotation
     for (let i = 0; i < 5; i++) store.getState().rotate('cabinet', 'cab-gts10')
-    expect(store.getState().cabinets.find((c) => c.id === 'cab-gts10')!.rotation).toBe(90)
+    expect(store.getState().cabinets.find((c) => c.id === 'cab-gts10')!.rotation).toBe((start + 450) % 360)
   })
 
   test('export → import round-trips the plan', () => {
@@ -111,6 +112,31 @@ describe('plan store', () => {
     expect(st.cabinets.every((c) => !('levelers' in c))).toBe(true)
     expect('leveler' in st.settings).toBe(false)
     expect(st.settings.shimAllowance).toBe(10)
+  })
+
+  test('a v4 save gets the measured outfeed widths and the 8 × 4 m room', async () => {
+    const storage = memoryStorage()
+    const a = createPlanStore(storage)
+    a.getState().updateSettings({ kerf: 2.5 })
+    const saved = JSON.parse(storage.getItem(STORAGE_KEY)!)
+    saved.version = 4
+    saved.state.fixtures = saved.state.fixtures.map((f: object) => ({ ...f, width: 1000 }))
+    saved.state.settings.room = { enabled: false, width: 6000, length: 4000 }
+    storage.setItem(STORAGE_KEY, JSON.stringify(saved))
+    const b = createPlanStore(storage)
+    await b.persist.rehydrate()
+    const st = b.getState()
+    expect(st.fixtures.map((f) => f.width)).toEqual([800, 400])
+    expect(st.settings.room).toEqual({ enabled: true, width: 8000, length: 4000 })
+  })
+
+  test('arrangeLayout moves things into the default layout and keeps sizes', () => {
+    const store = fresh()
+    store.getState().updateFixture('fx-outfeed-2', { width: 450, x: 3000, z: 1500 })
+    store.getState().arrangeLayout()
+    const f = store.getState().fixtures.find((x) => x.id === 'fx-outfeed-2')!
+    expect(f.width).toBe(450)
+    expect(f.z).toBe(0)
   })
 
   test('reset restores the seed', () => {

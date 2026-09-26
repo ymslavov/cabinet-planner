@@ -242,6 +242,11 @@ textarea {
   color: var(--red);
 }
 
+.btn.armed:not(.danger) {
+  background: var(--tape);
+  border-color: var(--tape-deep);
+}
+
 .btn.danger.armed {
   background: var(--red);
   border-color: var(--red);

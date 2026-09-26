@@ -154,6 +154,15 @@ export function runChecks(
       if (overlaps(strip, f) && f.top > strip.top + TOL)
         add('warn', `${f.name} stands above the ${fmt(strip.top)} mm deck in ${c.name}'s feed path`, c.id, 'feed-blocked')
     }
+    // Run-out to the walls: info only — the cabinets roll, so long stock means rolling it out.
+    if (s.room.enabled) {
+      const self = fps.find((f) => f.id === c.id)!
+      const alongX = strip.sx > strip.sz
+      const [pos, half, wall] = alongX ? [self.x, self.sx / 2, s.room.width / 2] : [self.z, self.sz / 2, s.room.length / 2]
+      const room = Math.min(wall - (pos + half), pos - half + wall)
+      if (room < s.feedLength - TOL)
+        add('info', `${c.name}: ${fmt(Math.round(room))} mm of feed to the wall on one side (of ${s.feedLength}) — roll it out for longer stock`, c.id)
+    }
   }
 
   // Stock

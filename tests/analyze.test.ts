@@ -55,8 +55,8 @@ describe('checks', () => {
     const st = seedState()
     // Two 1000 × 600 fixtures side by side along Z, 700 apart: clear at 0°, overlapping when turned 90°.
     st.fixtures = [
-      { ...st.fixtures[0], x: 5000, z: 0 },
-      { ...st.fixtures[1], x: 5000, z: 700 },
+      { ...st.fixtures[0], width: 1000, length: 600, rotation: 0, x: 5000, z: 0 },
+      { ...st.fixtures[1], width: 1000, length: 600, rotation: 0, x: 5000, z: 700 },
     ]
     expect(warns(st).filter((m) => m.includes('overlaps'))).toEqual([])
     st.fixtures[0].rotation = 90
@@ -91,9 +91,9 @@ describe('checks', () => {
 
   test('something taller than the deck in a feed path warns', () => {
     const st = seedState()
-    // Sander (its body stands above 900) straight behind the table saw.
-    st.cabinets[1].x = -1500
-    st.cabinets[1].z = -1600
+    // Sander (its body stands above 900) in line with the table saw, past the left outfeed.
+    st.cabinets[1].x = -1800
+    st.cabinets[1].z = 0
     expect(warns(st).some((m) => m.includes("Table saw base's feed path"))).toBe(true)
   })
 

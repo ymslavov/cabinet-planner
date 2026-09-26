@@ -7,7 +7,8 @@ Keep this current: tick things off with a date, add what Y asks for. Newest deci
 - [ ] Measure every tool's real base footprint and deck height (all but the PBD 40 are sheet
       estimates). Enter them in the app, untick nothing — tick **Measured** on the tool.
       Mirror into `workshop.md` and `seed.ts`.
-- [ ] Measure the two outfeed cabinets (width × depth × top height), tick **Measured**.
+- [x] Outfeed cabinet widths: 800 and 400 (2026-09-26).
+- [ ] Measure the outfeed cabinets' depth and top height, then tick **Measured**.
 - [ ] Count the 30 × 40 timber: lengths and quantities → Settings → Lengths on hand.
 - [ ] Gauge the real OSB thickness → Settings → Measured thickness (affects every carcass
       height and the tops).
@@ -19,6 +20,8 @@ Keep this current: tick things off with a date, add what Y asks for. Newest deci
 - Scheppach HMS 850 planer-thicknesser (schema v2), hardware list.
 - Height trimming with slotted shims under each tool (schema v4) — replaced the levelling
   feet of v3, which Y rejected: the cabinets stay on their casters.
+- Default layout for the 8 × 4 m room (table saw centre + outfeeds, stations on the long
+  walls), orthographic plan view, schema v5.
 - Cut planning: explicit cut tree, numbered cut order, fewest/longest cuts and consolidated
   offcuts preferred.
 - If nesting ever feels slow while typing (osb-cleat ≈ 300 ms in node), move `nestSheets`

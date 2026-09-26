@@ -366,13 +366,20 @@ function SettingsPanel() {
       </section>
       <section className="section">
         <h2>Room</h2>
-        <Check label="Show the room outline" checked={s.room.enabled} onChange={(enabled) => up({ room: { ...s.room, enabled } })} />
+        <Check label="Show the room walls" checked={s.room.enabled} onChange={(enabled) => up({ room: { ...s.room, enabled } })} />
         {s.room.enabled && (
           <div className="field-grid" style={{ marginTop: 8 }}>
             <NumberField label="Width" value={s.room.width} onChange={(width) => up({ room: { ...s.room, width } })} min={500} />
             <NumberField label="Depth" value={s.room.length} onChange={(length) => up({ room: { ...s.room, length } })} min={500} />
           </div>
         )}
+        <p className="hint">
+          Default layout: table saw in the middle feeding along the room with an outfeed cabinet each side; mitre saw, drill press and sander on the
+          back wall; planer and thicknesser on the front wall.
+        </p>
+        <div className="row-actions" style={{ marginTop: 8 }}>
+          <ConfirmButton danger={false} label="Arrange in default layout" confirmLabel="Move everything? Click again" onConfirm={() => planStore.getState().arrangeLayout()} />
+        </div>
       </section>
     </>
   )

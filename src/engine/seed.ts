@@ -1,3 +1,4 @@
+import { arrangeDefault } from './layout'
 import type { Cabinet, Fixture, PlanState, Settings, Tool } from './types'
 
 // Mirrors skill/references/workshop.md — change both together.
@@ -15,7 +16,7 @@ export function defaultSettings(): Settings {
     topLayers: 2,
     shimAllowance: 10,
     feedLength: 2500,
-    room: { enabled: false, width: 6000, length: 4000 },
+    room: { enabled: true, width: 8000, length: 4000 },
   }
 }
 
@@ -138,7 +139,7 @@ function cabinet(id: string, toolId: string, x: number, z: number, shelf: number
   }
 }
 
-/** In front of the row, clear of every other feed path; its own feed runs left–right. */
+/** Its own feed runs left–right. Position is set by arrangeDefault (front wall). */
 const PLANER_CABINET: Cabinet = {
   id: 'cab-hms850',
   name: 'Planer base',
@@ -158,31 +159,31 @@ export function planerSeed(): { tool: Tool; cabinet: Cabinet } {
   return { tool: seedTools().find((t) => t.id === 'hms850')!, cabinet: { ...PLANER_CABINET } }
 }
 
-// Starting layout: mitre saw against the back wall (its wings run along X), table saw and
-// thicknesser with an outfeed cabinet behind each, sander and drill press out of every feed path.
 function seedCabinets(): Cabinet[] {
   return [
-    { ...cabinet('cab-gcm8', 'gcm8', 0, -1800, 320), name: 'Mitre saw base' },
-    { ...cabinet('cab-bts700', 'bts700', -300, 900, 250), name: 'Sander base' },
-    { ...cabinet('cab-gts10', 'gts10', -1500, 0, 200), name: 'Table saw base' },
-    { ...cabinet('cab-2012nb', '2012nb', 1500, 0, 270), name: 'Thicknesser base' },
-    { ...cabinet('cab-pbd40', 'pbd40', 400, 900, 320), name: 'Drill press base' },
+    { ...cabinet('cab-gcm8', 'gcm8', 0, 0, 320), name: 'Mitre saw base' },
+    { ...cabinet('cab-bts700', 'bts700', 0, 0, 250), name: 'Sander base' },
+    { ...cabinet('cab-gts10', 'gts10', 0, 0, 200), name: 'Table saw base' },
+    { ...cabinet('cab-2012nb', '2012nb', 0, 0, 270), name: 'Thicknesser base' },
+    { ...cabinet('cab-pbd40', 'pbd40', 0, 0, 320), name: 'Drill press base' },
     PLANER_CABINET,
   ]
 }
 
 function seedFixtures(): Fixture[] {
   return [
-    { id: 'fx-outfeed-1', name: 'Outfeed cabinet 1', width: 1000, length: 600, height: 900, x: -1500, z: -660, rotation: 0, measured: false },
-    { id: 'fx-outfeed-2', name: 'Outfeed cabinet 2', width: 1000, length: 600, height: 900, x: 1500, z: -560, rotation: 0, measured: false },
+    // Widths from Y (80 and 40 cm); depth still a placeholder — hence not measured.
+    { id: 'fx-outfeed-1', name: 'Outfeed cabinet 1', width: 800, length: 600, height: 900, x: 0, z: 0, rotation: 0, measured: false },
+    { id: 'fx-outfeed-2', name: 'Outfeed cabinet 2', width: 400, length: 600, height: 900, x: 0, z: 0, rotation: 0, measured: false },
   ]
 }
 
+/** Positions come from `arrangeDefault` (layout.ts), not from the seed lists above. */
 export function seedState(): PlanState {
-  return {
+  return arrangeDefault({
     settings: defaultSettings(),
     tools: seedTools(),
     cabinets: seedCabinets(),
     fixtures: seedFixtures(),
-  }
+  })
 }

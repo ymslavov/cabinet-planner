@@ -62,11 +62,11 @@ store ──▶ sizing ──▶ parts ──┬──▶ 3D layout (src/three)
 
 ## Current state (keep this paragraph true)
 
-As of 2026-09-26: `main` — 98 unit tests, schema v4. Six cabinets (the HMS 850 planer
-joined in v2), all on casters; tool decks are trimmed with 10 mm slotted shim stacks (v4 —
-the v3 levelling feet were rejected and removed). Seed design (six open boxes, timber cleats,
-one shelf each) nests onto **4 of 7 sheets** (3.65) in 61 numbered cuts averaging 1.03 m.
-All tool and outfeed dimensions are still sheet estimates — see `roadmap.md` → Waiting on Y.
+As of 2026-09-26: `main` — 107 unit tests, schema v5. Six cabinets, all on casters, in an
+8 × 4 m room: table saw in the middle with the 800 and 400 wide outfeed cabinets either side,
+the rest against the long walls (`arrangeDefault`). Tool decks are trimmed with 10 mm slotted
+shim stacks. Seed design nests onto **4 of 7 sheets** in ~61 numbered cuts.
+All tool dimensions and the outfeed depths are still estimates — see `roadmap.md`.
 Published: https://ymslavov.github.io/cabinet-planner/ (public repo ymslavov/cabinet-planner,
 auto-deployed from `main` after the tests pass). All tool
 and outfeed dimensions are still sheet estimates — see `roadmap.md` → Waiting on Y.

@@ -137,7 +137,8 @@ export function Segmented<T extends string>(props: { value: T; options: { value:
 }
 
 /** A destructive button that needs a second click within 3 s — the app has no dialogs. */
-export function ConfirmButton(props: { label: string; confirmLabel?: string; onConfirm: () => void; small?: boolean }) {
+export function ConfirmButton(props: { label: string; confirmLabel?: string; onConfirm: () => void; small?: boolean; danger?: boolean }) {
+  const danger = props.danger ?? true
   const [armed, setArmed] = useState(false)
   useEffect(() => {
     if (!armed) return
@@ -147,7 +148,7 @@ export function ConfirmButton(props: { label: string; confirmLabel?: string; onC
   return (
     <button
       type="button"
-      className={`btn danger${armed ? ' armed' : ''}${props.small ? ' small' : ''}`}
+      className={`btn${danger ? ' danger' : ''}${armed ? ' armed' : ''}${props.small ? ' small' : ''}`}
       onClick={() => (armed ? (setArmed(false), props.onConfirm()) : setArmed(true))}
     >
       {armed ? (props.confirmLabel ?? `Click again to ${props.label.toLowerCase()}`) : props.label}

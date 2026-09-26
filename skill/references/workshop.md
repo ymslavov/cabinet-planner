@@ -18,8 +18,15 @@ the Google Drive connector can't see; it *is* link-readable, so fetch it with
   OSB-3's strength axis runs along the 2500 mm length.
 - **30 × 40 mm timber, quantity and lengths unknown.** Enter in Settings → Timber stock
   once counted; until then the app reports needed bars at the default length (3000).
-- **Two existing rolling cabinets, 900 mm work surface**, used as outfeed tables. Footprint
-  **not yet measured** — seeded as 1000 × 600 placeholders flagged MEASURE.
+- **Two existing rolling cabinets, 900 mm work surface**, used as outfeed tables.
+  **Widths 800 and 400 mm** (Y, 2026-09-26); **depth not yet measured** (600 placeholder), so
+  both stay flagged MEASURE.
+
+## The room (2026-09-26)
+
+8 × 4 m. Y's layout: table saw in the middle with the two outfeed cabinets either side, all
+other stations against the two long walls. The app's `arrangeDefault` (engine `layout.ts`)
+builds exactly that — see `engine.md` → Default layout.
 
 ## Shared plane
 

@@ -1,4 +1,4 @@
-import { Grid, OrbitControls } from '@react-three/drei'
+import { Grid, OrbitControls, OrthographicCamera, PerspectiveCamera } from '@react-three/drei'
 import { Canvas, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import type { Derived } from '../engine/analyze'
@@ -19,6 +19,11 @@ function useBounds(derived: Derived): Bounds {
   const fixtures = usePlan((s) => s.fixtures)
   return useMemo(() => {
     const fps = footprints({ settings, tools, cabinets, fixtures }, derived.dims)
+    // Frame the room too when it's shown.
+    if (settings.room.enabled) {
+      const { width: w, length: l } = settings.room
+      fps.push({ id: 'room', name: 'room', x: 0, z: 0, sx: w, sz: l, top: 0 })
+    }
     if (fps.length === 0) return { minX: -1000, maxX: 1000, minZ: -1000, maxZ: 1000 }
     return {
       minX: Math.min(...fps.map((f) => f.x - f.sx / 2)),
@@ -29,30 +34,39 @@ function useBounds(derived: Derived): Bounds {
   }, [settings, tools, cabinets, fixtures, derived.dims])
 }
 
-/** Moves the camera when the view mode or the "fit" request changes. */
+/**
+ * Aims the camera when the view mode or the "fit" request changes. Top view is a true
+ * orthographic plan (no perspective lean, so what looks inside the room is inside it);
+ * the 3D view is a perspective camera from the front-right.
+ */
 function CameraRig({ bounds, topView, fitNonce }: { bounds: Bounds; topView: boolean; fitNonce: number }) {
   const camera = useThree((s) => s.camera)
+  const size = useThree((s) => s.size)
   const controls = useThree((s) => s.controls) as unknown as { target: { set: (x: number, y: number, z: number) => void }; update: () => void } | null
   useEffect(() => {
     if (!controls) return
     const cx = (bounds.minX + bounds.maxX) / 2
     const cz = (bounds.minZ + bounds.maxZ) / 2
-    const span = Math.max(bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ, 2000)
-    // Distance that fits `span` in a 38° vertical field of view, with room for labels.
-    const dist = span * 1.45 + 1200
-    if (topView) {
-      camera.position.set(cx, dist, cz + 1)
+    const spanX = Math.max(bounds.maxX - bounds.minX, 1000)
+    const spanZ = Math.max(bounds.maxZ - bounds.minZ, 1000)
+    if (topView && 'isOrthographicCamera' in camera) {
+      camera.position.set(cx, 30000, cz + 0.01)
+      camera.zoom = 0.9 * Math.min(size.width / spanX, size.height / spanZ)
+      camera.updateProjectionMatrix()
       controls.target.set(cx, 0, cz)
-    } else {
+    } else if (!topView) {
+      const span = Math.max(spanX, spanZ, 2000)
+      // Distance that fits `span` in a 38° vertical field of view, with room for labels.
+      const dist = span * 1.45 + 1200
       const dir = [0.3, 0.62, 0.72]
       const n = Math.hypot(...dir)
       camera.position.set(cx + (dir[0] / n) * dist, 450 + (dir[1] / n) * dist, cz + (dir[2] / n) * dist)
       controls.target.set(cx, 450, cz)
     }
     controls.update()
-    // Only re-aim on explicit requests, not whenever bounds change during a drag.
+    // Only re-aim on explicit requests (or a camera swap), not whenever bounds change mid-drag.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [topView, fitNonce, controls])
+  }, [topView, fitNonce, controls, camera])
   return null
 }
 
@@ -209,15 +223,19 @@ export default function LayoutView({ derived }: { derived: Derived }) {
       <Canvas
         shadows="percentage"
         dpr={[1, 2]}
-        camera={{ position: [3000, 3500, 5500], fov: 38, near: 20, far: 80000 }}
         onPointerMissed={(e) => e.button === 0 && planStore.getState().select(null)}
       >
         <color attach="background" args={[COLORS.ground]} />
+        {view.topView ? (
+          <OrthographicCamera makeDefault near={10} far={80000} position={[0, 30000, 0.01]} />
+        ) : (
+          <PerspectiveCamera makeDefault fov={38} near={20} far={80000} position={[3000, 3500, 5500]} />
+        )}
         <hemisphereLight args={['#ffffff', '#b8b2a6', 1.1]} />
         <directionalLight
           position={[2500, 6000, 3500]}
           intensity={1.9}
-          castShadow
+          castShadow={!view.topView}
           shadow-mapSize={[4096, 4096]}
           shadow-camera-left={-6000}
           shadow-camera-right={6000}
@@ -262,7 +280,13 @@ export default function LayoutView({ derived }: { derived: Derived }) {
         ))}
         {view.showPlane && <WorkPlane bounds={bounds} height={targetHeight} />}
         {view.showFeed && <FeedStrips derived={derived} />}
-        <OrbitControls makeDefault maxPolarAngle={Math.PI / 2 - 0.03} minDistance={400} maxDistance={30000} />
+        <OrbitControls
+          makeDefault
+          enableRotate={!view.topView}
+          maxPolarAngle={Math.PI / 2 - 0.03}
+          minDistance={400}
+          maxDistance={view.topView ? 60000 : 30000}
+        />
         <CameraRig bounds={bounds} topView={view.topView} fitNonce={fitNonce} />
         <LabelProjector labels={labels} els={labelEls} />
       </Canvas>

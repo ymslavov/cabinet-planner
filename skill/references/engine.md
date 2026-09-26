@@ -124,3 +124,24 @@ nesting of open boxes with one shelf each needs about half the stock.
 items (same key + spec). Every buildable cabinet: 4 braked casters, 16 caster bolts
 (M8 × ⌈t + 25⌉₁₀). Shimmed cabinets: 4 slotted shim stacks of `shimAllowance`.
 `Derived.hardware = { byCabinet, totals }`.
+
+## Default layout — `layout.ts` → `arrangeDefault(state)`
+
+Positions (not sizes) for Y's shop, computed from the real sizes so it can be re-applied after
+anything changes (Settings → Room → "Arrange in default layout"; `seedState()` runs it too).
+Room centred on the origin, long walls along X, 20 mm gaps.
+
+- **Table saw** at the centre, turned 90° so it feeds along the 8 m axis (the only direction
+  with 2.5 m each side). The first two fixtures (outfeed cabinets) butt up to it 20 mm away on
+  either side of the feed line, each turned so its longer side runs along the feed.
+- **Back wall** (−Z): mitre saw centred (wings along the wall, strip ±2805 stays inside the
+  room), drill press at the left end, sander at the right end — both outside the mitre strip.
+- **Front wall** (+Z): planer (turned 180°, feed along X) left, thicknesser (turned 90° so its
+  feed runs along the wall) right. They keep exactly `feedLength` between them — neither in the
+  other's strip — and split the rest of the wall equally as run-out: 2120 mm each in 8 m.
+  A full 2.5 m everywhere would need an 8.76 m wall; roll one out for longer stock.
+- Cabinets whose tool it doesn't know keep their position; fixtures beyond the first two too.
+
+Checks added with it: **wall run-out** (info) — when the room is shown, a feed path with less
+than `feedLength` to a wall says how much it has ("roll it out for longer stock"). Info, not
+warn, because every cabinet is on casters.

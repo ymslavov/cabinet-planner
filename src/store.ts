@@ -1,11 +1,12 @@
 import { useStore } from 'zustand'
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware'
 import { createStore } from 'zustand/vanilla'
+import { arrangeDefault } from './engine/layout'
 import { defaultSettings, planerSeed, seedState } from './engine/seed'
 import type { Cabinet, Fixture, PlanState, Rotation, Settings, Tool } from './engine/types'
 
 export const STORAGE_KEY = 'cabinet-planner'
-export const SCHEMA_VERSION = 4
+export const SCHEMA_VERSION = 5
 
 export type Selection = { kind: 'cabinet' | 'fixture' | 'tool'; id: string } | { kind: 'settings' } | null
 
@@ -40,6 +41,8 @@ export interface PlanStore extends PlanState {
   move: (kind: 'cabinet' | 'fixture', id: string, x: number, z: number) => void
   rotate: (kind: 'cabinet' | 'fixture', id: string) => void
   reset: () => void
+  /** Move everything to the default shop layout, keeping all sizes and settings. */
+  arrangeLayout: () => void
   exportJson: () => string
   importJson: (text: string) => { ok: true } | { ok: false; error: string }
 }
@@ -129,6 +132,15 @@ function migrate(state: PlanState, fromVersion: number): PlanState {
     st = { ...st, cabinets: st.cabinets.map(({ levelers: _drop, ...c }: Cabinet & { levelers?: boolean }) => c) }
     const { leveler: _gone, ...settings } = st.settings as Settings & { leveler?: unknown }
     st = { ...st, settings }
+  }
+  if (fromVersion < 5) {
+    // v5: Y measured the outfeed cabinets' widths (80 and 40 cm); the default room became an
+    // 8 × 4 m room shown on the floor. Only an untouched old default room is replaced.
+    const widths: Record<string, number> = { 'fx-outfeed-1': 800, 'fx-outfeed-2': 400 }
+    st = { ...st, fixtures: st.fixtures.map((f) => (widths[f.id] ? { ...f, width: widths[f.id] } : f)) }
+    const r = st.settings.room
+    if (r && !r.enabled && r.width === 6000 && r.length === 4000)
+      st = { ...st, settings: { ...st.settings, room: { enabled: true, width: 8000, length: 4000 } } }
   }
   return withDefaults(st)
 }
@@ -251,6 +263,10 @@ export function createPlanStore(storage: StateStorage) {
         },
 
         reset: () => set({ ...seedState(), selection: null }),
+        arrangeLayout: () => {
+          const { settings, tools, cabinets, fixtures } = get()
+          set({ ...arrangeDefault({ settings, tools, cabinets, fixtures }), fitNonce: get().fitNonce + 1 })
+        },
 
         exportJson: () => {
           const { settings, tools, cabinets, fixtures } = get()

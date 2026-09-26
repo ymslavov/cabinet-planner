@@ -54,11 +54,13 @@ zustand vanilla store + `persist`, exposed as `planStore` and the `usePlan(selec
 
 - **Persisted** under localStorage key `cabinet-planner`: settings, tools, cabinets, fixtures,
   and view prefs. **Not persisted**: selection.
-- **Schema version** `SCHEMA_VERSION = 4`. To change the shape: bump it and add a step to
+- **Schema version** `SCHEMA_VERSION = 5`. To change the shape: bump it and add a step to
   `migrate()`. History: v2 (2026-09-26) adds the HMS 850 tool + "Planer base" cabinet to older
   saves (only if missing) — seed changes never reach an existing save on their own. v3 added
   levelling feet (`cabinet.levelers`, `settings.leveler`); v4 removes both again (Y rejected
-  the design) — `shimAllowance` comes from `withDefaults`. New *settings* keys need no migration — `withDefaults` fills them from
+  the design) — `shimAllowance` comes from `withDefaults`. v5 sets the measured outfeed widths
+  (800 / 400 on `fx-outfeed-1/2`) and swaps an untouched old default room (6 × 4 m, hidden)
+  for 8 × 4 m shown. It does **not** move anything — that's the "Arrange" button. New *settings* keys need no migration — `withDefaults` fills them from
   `defaultSettings()` on load and import.
 - **Corrupt save**: `safeStorage` copies an unparseable value to `cabinet-planner.corrupt`
   and starts from the seed — the app never white-screens on bad storage.
@@ -113,8 +115,12 @@ all-caps labels.
 
 - Scene units are millimetres; camera near 20 / far 80 000. An object's group sits at
   (x, 0, z) turned by `-rotation` about Y (clockwise seen from above).
-- **Camera**: "Top view" toggles a straight-down preset; "Fit all" re-frames the bounds of all
-  footprints (`fitNonce` in the store). Bounds changes alone (dragging) don't move the camera.
+- **Camera**: "Top view" switches to an **orthographic** plan camera (pan/zoom, no rotate, no
+  shadows) — a perspective top view made tall machines by the walls lean outside the room.
+  "Fit all" re-frames the footprints plus the room when shown (`fitNonce` in the store).
+  Bounds changes alone (dragging) don't move the camera.
+- **Default layout**: Settings → Room → "Arrange in default layout" (click twice) runs
+  `arrangeDefault` on the current plan — positions only, sizes and settings kept.
 - **Work plane**: translucent yellow plane at `targetHeight` over the layout. **Feed strips**:
   green at deck height per feed-axis tool, red when a `feed-blocked` warning exists for it.
 - **X-ray** (selected cabinet): panels ghost to 16 % so the framing shows. **Exploded**:
