@@ -1,5 +1,5 @@
 import type { NestResult } from './nest'
-import { shelfRange } from './parts'
+import { casterPositions, footPositions, shelfRange } from './parts'
 import type { TimberResult } from './timber'
 import type { Cabinet, CabinetDims, Fixture, Part, PlanState, Rotation, Tool } from './types'
 
@@ -108,12 +108,34 @@ export function runChecks(
       if (h < lo || h > hi) add('warn', `${c.name}: shelf at ${h} mm is outside ${fmt(lo)}–${fmt(hi)} and is left out`, c.id)
     }
     if (!c.hasBack) add('warn', `${c.name}: no back panel — the box will rack when rolled`, c.id)
+    const feet = c.levelers ? footPositions(d, s, c.method) : []
+    if (c.levelers && feet.length === 0)
+      add('warn', `${c.name}: too small for levelling feet beside its casters — widen it or turn the feet off`, c.id)
+    // Tipping: the narrowest spread of wheels (and of feet, which carry it when working)
+    // against the height of cabinet + tool. Rule of thumb: at least a fifth of the height.
+    const [cx, cz] = casterPositions(d)[3]
+    let spread = Math.min(2 * cx, 2 * cz)
+    if (feet.length) spread = Math.min(spread, 2 * feet[3][0], 2 * feet[3][1])
+    const height = d.surfaceHeight + (tool ? tool.overallHeight : 0)
+    if (spread < 0.2 * height)
+      add('warn', `${c.name}: only ${fmt(spread)} mm between wheels or feet for ${fmt(height)} mm of height — it could tip; widen it to at least ${fmt(Math.ceil(0.2 * height + 2 * (d.width / 2 - cx)))} mm`, c.id)
     if (tool && !tool.measured) add('info', `MEASURE ${tool.name} before cutting — dimensions are estimates`, tool.id)
   }
 
-  // Fixtures
+  // Fixtures (the outfeed cabinets). Levelling feet can meet one a little off the plane.
+  const leveled = state.cabinets.filter((c) => {
+    const tool = state.tools.find((t) => t.id === c.toolId)
+    return dims[c.id].adjust && !tool?.exempt && (parts[c.id] ?? []).length > 0
+  })
   for (const f of state.fixtures) {
-    if (Math.abs(f.height - s.targetHeight) > TOL) add('warn', `${f.name}: top at ${f.height} mm, not ${s.targetHeight}`, f.id)
+    const off = f.height - s.targetHeight
+    if (Math.abs(off) > TOL) {
+      const reachable = leveled.length > 0 && leveled.every((c) => dims[c.id].adjust!.min - TOL <= f.height && f.height <= dims[c.id].adjust!.max + TOL)
+      if (reachable)
+        add('info', `${f.name} is at ${f.height} mm: wind the levelling feet ${off > 0 ? 'down' : 'up'} ${fmt(Math.abs(off))} mm on the other bases to match`, f.id)
+      else
+        add('warn', `${f.name}: top at ${f.height} mm, not ${s.targetHeight}${leveled.length ? ` — beyond the ±${fmt(s.leveler.travel / 2)} mm the levelling feet can reach` : ''}`, f.id)
+    }
     if (!f.measured) add('info', `MEASURE ${f.name} — size is a placeholder`, f.id)
   }
 

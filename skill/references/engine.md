@@ -11,11 +11,17 @@ here. Tests live in `tests/*.test.ts`; the sheet's own rows are the sizing fixtu
 | length | `tool.baseLength + 2 × clearance` (override wins) |
 | surfaceHeight | `targetHeight − tool.deckHeight`; exempt tool → `tool.fixedSurfaceHeight`; no tool → `targetHeight` (override wins) |
 | topThickness | `topLayers × sheet.thickness` (measured thickness, not nominal) |
-| carcassHeight | `surfaceHeight − casterHeight − topThickness` |
+| lift | `leveler.travel / 2` with levelling feet, else 0 |
+| baseHeight | `casterHeight + lift` (floor → underside of the bottom panel at design height) |
+| carcassHeight | `surfaceHeight − baseHeight − topThickness` |
+| adjust | with feet: `{ min: deck − lift, max: deck + travel − lift }` (top instead of deck without a tool); null without |
 | deckTop | `surfaceHeight + tool.deckHeight` (null without a tool) |
 
 A tool-less cabinet defaults to 600 × 600 (`TOOLLESS_SIZE`). A non-positive carcass is
 returned, not thrown — `checks` reports it and `parts` yields nothing for that cabinet.
+
+The sheet has no feet: its fixtures below are tested with `levelers: false`; with feet on,
+every carcass is 15 mm shorter (e.g. GTS 10 XC 415 instead of 430).
 
 Fixtures from the sheet (100 mm casters, 2 × 15 top): GTS 10 XC 790×620 / 560 / 430,
 2012NB 530×420 / 710 / 580, BTS 700 530×440 / 670 / 540, GCM 8 SJL 610×480 / 805 / 675,
@@ -71,8 +77,8 @@ was entered — from unlimited `defaultLength` bars (3000).
 | Level | Fires when |
 |---|---|
 | error | carcass ≤ 0; cabinet too small for its framing; more sheets than `sheet.count`; a piece fits no sheet; timber shortfall (stock entered); timber piece longer than any bar |
-| warn | deck off the target plane (±0.5); tool base bigger than the top; shelf outside `shelfRange`; no back; footprints overlap (touching is fine); outside the room; something **taller than the deck** inside a feed path; fixture top ≠ target; cabinet's tool deleted |
-| info | MEASURE for unmeasured tools/fixtures; timber stock not entered |
+| warn | deck off the target plane (±0.5); feet on but no room for them; **tipping**: narrowest spread of wheels and feet < 0.2 × (top + tool height); fixture off the plane *beyond* the feet's reach; tool base bigger than the top; shelf outside `shelfRange`; no back; footprints overlap (touching is fine); outside the room; something **taller than the deck** inside a feed path; fixture top ≠ target; cabinet's tool deleted |
+| info | MEASURE for unmeasured tools/fixtures; timber stock not entered; fixture off the plane but within every levelled cabinet's range ("wind the feet down 5 mm") |
 
 Footprints use the rotated size (90°/270° swap width and length). A **feed path** exists for
 non-exempt tools with `feedAxis` x/z: a strip `tool base` wide, running `feedLength` (2500)
@@ -95,3 +101,11 @@ Nesting is memoised on its JSON input, so dragging cabinets (position-only chang
 
 The spreadsheet's "7 sheets" was an area estimate including 10 drawers and 15 % waste; real
 nesting of open boxes with one shelf each needs about half the stock.
+
+## Hardware — `hardware.ts`
+
+`cabinetHardware(cab, dims, parts, s)` per cabinet, `hardwareTotals(lists)` sums identical
+items (same key + spec). Every buildable cabinet: 4 braked casters, 16 caster bolts
+(M8 × ⌈t + 25⌉₁₀). With feet, per foot: rod, T-nut, 3 hex nuts, washer, dome nut + pad.
+Rod length = ⌈block + t + 30 (nuts inside) + (baseHeight + travel − lift − block)⌉₁₀ —
+180 mm for 100 mm casters and ±15 travel. `Derived.hardware = { byCabinet, totals }`.

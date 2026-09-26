@@ -61,6 +61,31 @@ Side rails and shelves then stop behind the front posts.
 generated only inside `shelfRange` = `[t + 2·cb, (H − t) − cb]` — its rail must clear the
 bottom rail and it must clear the top rail. Out-of-range shelves are dropped (checks warn).
 
+## Levelling feet (`cabinet.levelers`, settings `leveler`)
+
+Why: the decks must meet the outfeed cabinets exactly, and a real build/floor won't hit 900
+to the millimetre. Four DIY feet per cabinet give ±`travel/2` (default ±15 mm).
+
+- **Where**: casters stay at the corners (`casterPositions`, centres 45 mm in from both edges)
+  so the rolling wheelbase stays wide. Each foot sits just inboard of its caster **along the
+  width** (`footPositions`): from the side edge `max(t + max(ca, cb) + 20, casterInset + 0.6 ×
+  casterHeight + block/2)` — clear of the side rails / rear posts and of the caster's swivel
+  circle; from the front/back edge `max(t + ca + 20, block/2 + 5)` — clear of the back/front
+  rails. Too small for that → no feet, and the checks say so.
+- **Foot block**: `block` × `block` (60) OSB, laminated from `footLayers` = ⌊(caster − 25)/t⌋
+  layers (5 × 15 = 75 mm for 100 mm casters), glued and screwed under the bottom panel. It
+  stays 25 mm off the floor when the cabinet rolls. Nested on the sheets like any part (role
+  `foot`, laminations = layers).
+- **Rod**: M`rod` (M12) threaded rod through a hammer-in T-nut (flange under the block), the
+  block and the bottom panel. Inside the cabinet two nuts locked together form the turning
+  head (with a washer) — adjust with a socket through the open front. A lock nut under the
+  T-nut fixes the setting; a dome nut with a rubber pad is the foot on the floor.
+- **Heights**: at the design height the feet hold the casters `lift = travel/2` off the floor,
+  so `baseHeight = casterHeight + lift` and the carcass is `lift` shorter than the sheet's.
+  Wind the feet up to roll, down to stand; the deck range is `[deck − lift, deck + travel − lift]`.
+- **Default**: on for every cabinet on the shared plane, off for exempt tools (the drill
+  press — its table adjusts, and a 380 mm base has no room beside the casters).
+
 ## Degenerate cabinets
 
 No parts when the carcass is ≤ 0, too short for top and bottom rails (`H − t < 2·cb + 1`),

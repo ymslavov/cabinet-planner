@@ -17,6 +17,7 @@ const cab = (extra: Partial<Cabinet> = {}): Cabinet => ({
   casterHeight: 100,
   shelves: [200],
   hasBack: true,
+  levelers: false,
   overrides: {},
   x: 0,
   z: 0,

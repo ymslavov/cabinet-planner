@@ -153,6 +153,7 @@ export default function LayoutView({ derived }: { derived: Derived }) {
   const selection = usePlan((s) => s.selection)
   const view = usePlan((s) => s.view)
   const targetHeight = usePlan((s) => s.settings.targetHeight)
+  const rodSize = usePlan((s) => s.settings.leveler.rod)
   const bounds = useBounds(derived)
   const fitNonce = usePlan((s) => s.fitNonce)
   const selId = selection && 'id' in selection ? selection.id : null
@@ -255,6 +256,7 @@ export default function LayoutView({ derived }: { derived: Derived }) {
             selected={selId === c.id}
             xray={view.xray}
             explode={view.explode}
+            rodSize={rodSize}
           />
         ))}
         {fixtures.map((f) => (

@@ -23,12 +23,13 @@ npm run shot       # Playwright screenshots → shots/ (dev server must be runni
 
 - **Settings**: targetHeight, clearance, kerf, sheet {length, width, thickness (measured), count},
   edgeTrim, respectGrain, timber {a, b, defaultLength, stock[{length, qty}]},
-  osbCleat {width, laminations}, topLayers, feedLength, room {enabled, width, length}.
+  osbCleat {width, laminations}, topLayers, leveler {travel, rod, block}, feedLength,
+  room {enabled, width, length}.
 - **Tool**: footprint (baseWidth × baseLength), deckHeight above its own base, overallHeight,
   shape (drives the 3D model), color, feedAxis (x/z/none, in cabinet space), exempt +
   fixedSurfaceHeight, measured, notes.
 - **Cabinet**: toolId (nullable), method, casterHeight, shelves[] (top-face heights above
-  the inside floor), hasBack, overrides {width, length, surfaceHeight}, x, z, rotation.
+  the inside floor), hasBack, levelers, overrides {width, length, surfaceHeight}, x, z, rotation.
 - **Fixture**: existing furniture (outfeed cabinets): width, length, height, x, z, rotation, measured.
 
 World placement: an object's x/z is its footprint centre; rotation turns it about Y in 90°
@@ -41,9 +42,11 @@ zustand vanilla store + `persist`, exposed as `planStore` and the `usePlan(selec
 
 - **Persisted** under localStorage key `cabinet-planner`: settings, tools, cabinets, fixtures,
   and view prefs. **Not persisted**: selection.
-- **Schema version** `SCHEMA_VERSION = 2`. To change the shape: bump it and add a step to
+- **Schema version** `SCHEMA_VERSION = 3`. To change the shape: bump it and add a step to
   `migrate()`. History: v2 (2026-09-26) adds the HMS 850 tool + "Planer base" cabinet to older
-  saves (only if missing) — seed changes never reach an existing save on their own. New *settings* keys need no migration — `withDefaults` fills them from
+  saves (only if missing) — seed changes never reach an existing save on their own. v3 adds
+  `cabinet.levelers` (true unless the cabinet's tool is exempt); `settings.leveler` comes from
+  `withDefaults`. New *settings* keys need no migration — `withDefaults` fills them from
   `defaultSettings()` on load and import.
 - **Corrupt save**: `safeStorage` copies an unparseable value to `cabinet-planner.corrupt`
   and starts from the seed — the app never white-screens on bad storage.
@@ -105,6 +108,10 @@ all-caps labels.
 - **X-ray** (selected cabinet): panels ghost to 16 % so the framing shows. **Exploded**:
   parts pushed out 70 % from the carcass centre, top layers lifted, tool raised 420 mm.
 - A cabinet the engine can't build (no parts) is drawn as a red translucent envelope.
+- Levelling feet: foot blocks are ordinary parts; `FootRods` draws each rod from the floor
+  (dome nut) up to the double-nut head inside, and casters hang `lift` mm above the floor.
+- The cabinet inspector has a "Levelling feet" section (toggle + reachable deck range);
+  Settings has travel / rod size / block size.
 - Verified 2026-09-26 with Playwright: dragging E moved it (400, 900) → (1170, 1160) on the
   10 mm snap and R turned it 90°; no console errors.
 
@@ -115,6 +122,7 @@ all-caps labels.
   part code and their **on-sheet** size (what you mark out), hatched background = waste,
   offcuts ≥ 150 × 150 labelled with their size. Hovering a piece or a table row highlights
   every piece with that code in yellow; the SVG `<title>` names the part and cabinet.
+- **Hardware to buy**: totals over all cabinets (casters, bolts, the levelling-foot kit).
 - **Timber**: one row per bar, cuts left to right with code + length, kerf gaps between,
   "N left" for offcuts ≥ 200. Bars say "to buy" while stock isn't entered.
 - **Parts by cabinet**: `partRows` groups identical parts; laminated OSB cleats show

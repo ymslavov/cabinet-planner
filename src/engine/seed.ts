@@ -13,6 +13,7 @@ export function defaultSettings(): Settings {
     timber: { a: 30, b: 40, defaultLength: 3000, stock: [] },
     osbCleat: { width: 60, laminations: 3 },
     topLayers: 2,
+    leveler: { travel: 30, rod: 12, block: 60 },
     feedLength: 2500,
     room: { enabled: false, width: 6000, length: 4000 },
   }
@@ -130,6 +131,7 @@ function cabinet(id: string, toolId: string, x: number, z: number, shelf: number
     casterHeight: 100,
     shelves: [shelf],
     hasBack: true,
+    levelers: true,
     overrides: {},
     x,
     z,
@@ -146,6 +148,7 @@ const PLANER_CABINET: Cabinet = {
   casterHeight: 100,
   shelves: [200],
   hasBack: true,
+  levelers: true,
   overrides: {},
   x: 0,
   z: 2200,
@@ -165,7 +168,8 @@ function seedCabinets(): Cabinet[] {
     { ...cabinet('cab-bts700', 'bts700', -300, 900, 250), name: 'Sander base' },
     { ...cabinet('cab-gts10', 'gts10', -1500, 0, 200), name: 'Table saw base' },
     { ...cabinet('cab-2012nb', '2012nb', 1500, 0, 270), name: 'Thicknesser base' },
-    { ...cabinet('cab-pbd40', 'pbd40', 400, 900, 320), name: 'Drill press base' },
+    // Exempt from the plane (its table adjusts) and too small for feet beside its casters.
+    { ...cabinet('cab-pbd40', 'pbd40', 400, 900, 320), name: 'Drill press base', levelers: false },
     PLANER_CABINET,
   ]
 }

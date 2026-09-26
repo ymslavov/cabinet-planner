@@ -16,6 +16,8 @@ Keep this current: tick things off with a date, add what Y asks for. Newest deci
 
 ## Built (2026-09-26, branch build/initial → main)
 
+- Scheppach HMS 850 planer-thicknesser (schema v2), levelling feet + hardware list (schema v3).
+
 - Sizing from the sheet's formulas, three build methods, open boxes with fixed shelves.
 - Part-level 3D shop layout with tool models, drag/rotate, x-ray, exploded view, work plane,
   feed paths.

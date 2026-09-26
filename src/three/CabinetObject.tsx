@@ -1,5 +1,6 @@
 import { Edges, Line } from '@react-three/drei'
 import { useMemo, useState } from 'react'
+import { casterPositions } from '../engine/parts'
 import type { Cabinet, CabinetDims, Part, Tool, Vec3 } from '../engine/types'
 import { COLORS, osbTextureFor } from './materials'
 import { ToolModel } from './ToolModel'
@@ -36,23 +37,18 @@ function PartMesh({ part, xray, position }: { part: Part; xray: boolean; positio
   )
 }
 
+/** Casters at the corners; with levelling feet they hang `lift` mm above the floor. */
 function Casters({ dims }: { dims: CabinetDims }) {
   const h = dims.casterHeight
   if (h <= 0) return null
   const r = h * 0.36
-  const inset = Math.min(70, dims.width / 4, dims.length / 4)
-  const spots: [number, number][] = [
-    [-dims.width / 2 + inset, -dims.length / 2 + inset],
-    [dims.width / 2 - inset, -dims.length / 2 + inset],
-    [-dims.width / 2 + inset, dims.length / 2 - inset],
-    [dims.width / 2 - inset, dims.length / 2 - inset],
-  ]
+  const plate = Math.min(80, dims.width / 2.5, dims.length / 2.5)
   return (
     <>
-      {spots.map(([x, z], i) => (
-        <group key={i} position={[x, 0, z]}>
+      {casterPositions(dims).map(([x, z], i) => (
+        <group key={i} position={[x, dims.lift, z]}>
           <mesh position={[0, h - 4, 0]}>
-            <boxGeometry args={[Math.min(90, inset * 1.6), 8, Math.min(90, inset * 1.6)]} />
+            <boxGeometry args={[plate, 8, plate]} />
             <meshStandardMaterial color={COLORS.steel} metalness={0.6} roughness={0.3} />
           </mesh>
           <mesh position={[0, (h - 8 + r) / 2, 0]}>
@@ -62,6 +58,33 @@ function Casters({ dims }: { dims: CabinetDims }) {
           <mesh position={[0, r, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
             <cylinderGeometry args={[r, r, r * 0.7, 24]} />
             <meshStandardMaterial color={COLORS.rubber} roughness={0.9} />
+          </mesh>
+        </group>
+      ))}
+    </>
+  )
+}
+
+/** Levelling rods: from the floor up through each foot block to the double nut inside. */
+function FootRods({ dims, parts, rod }: { dims: CabinetDims; parts: Part[]; rod: number }) {
+  const feet = parts.filter((p) => p.role === 'foot')
+  const top = dims.baseHeight + dims.t + 30
+  return (
+    <>
+      {feet.map((f) => (
+        <group key={f.id} position={[f.center[0], 0, f.center[2]]}>
+          <mesh position={[0, top / 2, 0]}>
+            <cylinderGeometry args={[rod / 2, rod / 2, top, 12]} />
+            <meshStandardMaterial color={COLORS.steel} metalness={0.8} roughness={0.25} />
+          </mesh>
+          {/* Dome-nut foot on the floor and the double-nut turning head inside */}
+          <mesh position={[0, 6, 0]}>
+            <sphereGeometry args={[rod * 0.9, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
+            <meshStandardMaterial color={COLORS.rubber} />
+          </mesh>
+          <mesh position={[0, top - 12, 0]}>
+            <cylinderGeometry args={[rod, rod, 20, 6]} />
+            <meshStandardMaterial color={COLORS.steelDark} metalness={0.7} roughness={0.3} />
           </mesh>
         </group>
       ))}
@@ -122,11 +145,12 @@ export function CabinetObject(props: {
   selected: boolean
   xray: boolean
   explode: boolean
+  rodSize: number
 }) {
-  const { cab, dims, parts, tool, selected, xray, explode } = props
+  const { cab, dims, parts, tool, selected, xray, explode, rodSize } = props
   const drag = useFloorDrag('cabinet', cab.id)
   const [hover, setHover] = useState(false)
-  const pivotY = dims.casterHeight + dims.carcassHeight / 2
+  const pivotY = dims.baseHeight + dims.carcassHeight / 2
   const factor = selected && explode ? 0.7 : 0
   const toolLift = factor ? 420 : 0
   const valid = parts.length > 0
@@ -151,6 +175,7 @@ export function CabinetObject(props: {
       }}
     >
       <Casters dims={dims} />
+      {!factor && <FootRods dims={dims} parts={parts} rod={rodSize} />}
       {valid ? (
         parts.map((p) => (
           <PartMesh key={p.id} part={p} xray={selected && xray} position={factor ? explodedCenter(p, pivotY, factor) : p.center} />

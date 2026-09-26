@@ -48,6 +48,7 @@ export function timberPieces(parts: Part[], codes: Record<string, string>): Timb
 export interface PartRow {
   codes: string[]
   label: string
+  role: Part['role']
   material: 'osb' | 'timber'
   length: number
   width: number
@@ -72,6 +73,7 @@ export function partRows(parts: Part[], codes: Record<string, string>): PartRow[
       rows.set(key, {
         codes: [codes[p.id]],
         label: base,
+        role: p.role,
         material: p.material,
         length: p.cut.length,
         width: p.cut.width,

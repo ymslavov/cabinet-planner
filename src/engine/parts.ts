@@ -22,6 +22,50 @@ export function shelfRange(dims: CabinetDims, s: Settings, method: BuildMethod):
 
 type Box = [number, number, number, number, number, number] // x0 x1 y0 y1 z0 z1
 
+/** Distance from each cabinet edge to a caster's centre (plates ~80 mm square). */
+function casterInset(d: CabinetDims): number {
+  return Math.min(45, d.width / 4, d.length / 4)
+}
+
+/** Caster centres in cabinet space (x, z). Casters stay at the corners with or without feet. */
+export function casterPositions(d: CabinetDims): [number, number][] {
+  const ci = casterInset(d)
+  return [
+    [-(d.width / 2 - ci), -(d.length / 2 - ci)],
+    [d.width / 2 - ci, -(d.length / 2 - ci)],
+    [-(d.width / 2 - ci), d.length / 2 - ci],
+    [d.width / 2 - ci, d.length / 2 - ci],
+  ]
+}
+
+/**
+ * Levelling-foot rod centres (x, z): one just inboard of each caster along the width.
+ * From the side edge: clear of the side rails and rear posts, and far enough from the caster
+ * that its block misses the wheel's swivel circle (0.6 × caster height). From the front/back
+ * edge: clear of the back and front rails. Empty when the cabinet is too small for them.
+ */
+export function footPositions(d: CabinetDims, s: Settings, method: BuildMethod): [number, number][] {
+  if (d.lift <= 0) return []
+  const { ca, cb } = framing(s, method)
+  const half = s.leveler.block / 2
+  const fx = Math.max(d.t + Math.max(ca, cb) + 20, casterInset(d) + 0.6 * d.casterHeight + half)
+  const fz = Math.max(d.t + ca + 20, half + 5)
+  if (d.width / 2 - fx < half + 5 || d.length / 2 - fz < half + 5) return []
+  const x = d.width / 2 - fx
+  const z = d.length / 2 - fz
+  return [
+    [-x, -z],
+    [x, -z],
+    [-x, z],
+    [x, z],
+  ]
+}
+
+/** OSB layers in a foot block: as deep as possible while staying 25 mm off the floor when rolling. */
+export function footLayers(d: CabinetDims): number {
+  return Math.max(1, Math.floor((d.casterHeight - 25) / d.t))
+}
+
 /**
  * Every physical part of an open-front box on casters, in cabinet space
  * (origin = footprint centre at floor level, +Z = front).
@@ -37,7 +81,7 @@ type Box = [number, number, number, number, number, number] // x0 x1 y0 y1 z0 z1
  * keeps the rear framing even without a back panel.
  */
 export function cabinetParts(cab: Cabinet, dims: CabinetDims, s: Settings): Part[] {
-  const { width: W, length: L, t, casterHeight: y0, carcassHeight: H } = dims
+  const { width: W, length: L, t, baseHeight: y0, carcassHeight: H } = dims
   const { ca, cb, material: cleatMaterial } = framing(s, cab.method)
   const innerH = H - t
   const frame = cab.method === 'timber-frame'
@@ -52,7 +96,7 @@ export function cabinetParts(cab: Cabinet, dims: CabinetDims, s: Settings): Part
   if (H <= 0 || innerH < 2 * cb + 1 || 2 * xIn - 2 * cb <= 0 || zFront - zRear <= 0) return []
 
   const parts: Part[] = []
-  const add = (key: string, label: string, role: PartRole, box: Box, material: 'osb' | 'timber' = 'osb') => {
+  const add = (key: string, label: string, role: PartRole, box: Box, material: 'osb' | 'timber' = 'osb', cut?: Part['cut']) => {
     const [x0, x1, y0b, y1, z0, z1] = box
     const size: Vec3 = [x1 - x0, y1 - y0b, z1 - z0]
     const center: Vec3 = [(x0 + x1) / 2, (y0b + y1) / 2, (z0 + z1) / 2]
@@ -65,7 +109,7 @@ export function cabinetParts(cab: Cabinet, dims: CabinetDims, s: Settings): Part
       material,
       size,
       center,
-      cut: cutFor(role, material, size, grainLocked, s),
+      cut: cut ?? cutFor(role, material, size, grainLocked, s),
       grainLocked,
     })
   }
@@ -79,6 +123,23 @@ export function cabinetParts(cab: Cabinet, dims: CabinetDims, s: Settings): Part
   add('side-r', 'Side right', 'side', [xIn, W / 2, yFloor, yTopUnder, zBack, L / 2])
   for (let i = 0; i < s.topLayers; i++) {
     add(`top-${i + 1}`, `Top layer ${i + 1}`, 'top', [-W / 2, W / 2, yTopUnder + i * t, yTopUnder + (i + 1) * t, -L / 2, L / 2])
+  }
+
+  // Levelling feet: laminated OSB blocks glued under the bottom, the rod runs up through them
+  if (cab.levelers) {
+    const n = footLayers(dims)
+    const hb = n * t
+    const half = s.leveler.block / 2
+    const names: Record<string, string> = { '-1,-1': 'back left', '1,-1': 'back right', '-1,1': 'front left', '1,1': 'front right' }
+    for (const [x, z] of footPositions(dims, s, cab.method)) {
+      const name = names[`${Math.sign(x)},${Math.sign(z)}`]
+      add(`foot-${name.replace(' ', '-')}`, `Foot block ${name}`, 'foot', [x - half, x + half, y0 - hb, y0, z - half, z + half], 'osb', {
+        length: s.leveler.block,
+        width: s.leveler.block,
+        thickness: t,
+        laminations: n,
+      })
+    }
   }
 
   // Rear corner verticals + back rails (between the verticals)

@@ -1,5 +1,6 @@
 import { runChecks, type Warning } from './checks'
 import { osbPieces, partCodes, timberPieces } from './cutlist'
+import { cabinetHardware, hardwareTotals, type HardwareItem } from './hardware'
 import { nestSheets, type NestPiece, type NestResult, type SheetSpec } from './nest'
 import { cabinetParts } from './parts'
 import { cabinetDims } from './sizing'
@@ -26,6 +27,7 @@ export interface Derived {
   timber: TimberResult
   budget: Budget
   warnings: Warning[]
+  hardware: { byCabinet: Record<string, HardwareItem[]>; totals: HardwareItem[] }
 }
 
 // Nesting runs 96 heuristics — skip it when only positions changed (dragging).
@@ -69,5 +71,8 @@ export function analyze(state: PlanState): Derived {
     timberStockKnown: timber.stockKnown,
     ok: !warnings.some((w) => w.level === 'error'),
   }
-  return { dims, parts, codes, nest, timber, budget, warnings }
+  const byCabinet: Record<string, HardwareItem[]> = {}
+  for (const c of state.cabinets) byCabinet[c.id] = cabinetHardware(c, dims[c.id], parts[c.id], s)
+  const hardware = { byCabinet, totals: hardwareTotals(state.cabinets.map((c) => byCabinet[c.id])) }
+  return { dims, parts, codes, nest, timber, budget, warnings, hardware }
 }

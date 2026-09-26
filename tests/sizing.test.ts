@@ -14,6 +14,7 @@ const cab = (toolId: string | null, extra: Partial<Cabinet> = {}): Cabinet => ({
   casterHeight: 100,
   shelves: [],
   hasBack: true,
+  levelers: false,
   overrides: {},
   x: 0,
   z: 0,

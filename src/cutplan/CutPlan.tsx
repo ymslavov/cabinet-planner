@@ -222,8 +222,42 @@ export default function CutPlan({ derived }: { derived: Derived }) {
 
       <section className="cp-section">
         <header className="cp-head">
+          <h2>Hardware to buy</h2>
+          <p>
+            For all cabinets. Each levelling foot is a rod through a T-nut in its OSB foot block: a dome nut on the floor end, a lock nut under
+            the T-nut, and two nuts locked together inside the cabinet to turn it with a socket.
+          </p>
+        </header>
+        {derived.hardware.totals.length === 0 ? (
+          <p className="hint">Nothing yet.</p>
+        ) : (
+          <div className="table-wrap">
+            <table className="parts">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Size and use</th>
+                  <th className="num">Qty</th>
+                </tr>
+              </thead>
+              <tbody>
+                {derived.hardware.totals.map((h) => (
+                  <tr key={`${h.key}|${h.spec}`}>
+                    <td>{h.item}</td>
+                    <td>{h.spec}</td>
+                    <td className="num">{h.qty}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="cp-section">
+        <header className="cp-head">
           <h2>Parts by cabinet</h2>
-          <p>Codes match the diagrams. Laminated OSB cleats are listed as strips: glue that many face to face per cleat.</p>
+          <p>Codes match the diagrams. Laminated OSB cleats and foot blocks are listed as strips or layers: glue that many face to face per part.</p>
         </header>
         {cabinets.map((c, i) => {
           const rows = partRows(derived.parts[c.id] ?? [], codes)
@@ -257,7 +291,7 @@ export default function CutPlan({ derived }: { derived: Derived }) {
                           <td className="codes">{r.codes.join(' ')}</td>
                           <td>
                             {r.label}
-                            {r.laminations > 1 && <small> ({r.laminations} strips per cleat)</small>}
+                            {r.laminations > 1 && <small> ({r.laminations} {r.role === 'foot' ? 'layers glued up per block' : 'strips per cleat'})</small>}
                             {r.grainLocked && <small> (along the strong axis)</small>}
                           </td>
                           <td>{r.material === 'osb' ? 'OSB' : 'Timber'}</td>

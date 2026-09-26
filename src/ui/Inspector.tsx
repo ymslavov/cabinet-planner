@@ -163,6 +163,29 @@ function CabinetPanel({ cab, derived }: { cab: Cabinet; derived: Derived }) {
       </section>
 
       <section className="section">
+        <h2>Levelling feet</h2>
+        <Check label="Four feet beside the casters" checked={cab.levelers} onChange={(levelers) => up({ levelers })} />
+        {cab.levelers && d.adjust ? (
+          <>
+            <dl className="readout" style={{ marginTop: 10 }}>
+              <dt>{tool ? 'Deck' : 'Top'} can be set between</dt>
+              <dd>
+                {r(d.adjust.min)}–{r(d.adjust.max)} mm
+              </dd>
+              <dt>Casters off the floor at design height</dt>
+              <dd>{r(d.lift)} mm</dd>
+            </dl>
+            <p className="hint">
+              Wind the feet down to lift the cabinet off its wheels and match the outfeed; wind them up to roll it. Turn each rod from inside the
+              cabinet with a socket on its locked double nut.
+            </p>
+          </>
+        ) : (
+          <p className="hint">Off: the cabinet stands on its casters at a fixed height.</p>
+        )}
+      </section>
+
+      <section className="section">
         <Position kind="cabinet" obj={cab} />
       </section>
 
@@ -340,6 +363,18 @@ function SettingsPanel() {
         <button className="btn small" style={{ marginTop: 8 }} onClick={() => setStock([...stock, { length: s.timber.defaultLength, qty: 1 }])}>
           Add a length
         </button>
+      </section>
+      <section className="section">
+        <h2>Levelling feet</h2>
+        <div className="field-grid three">
+          <NumberField label="Height travel" value={s.leveler.travel} onChange={(travel) => up({ leveler: { ...s.leveler, travel } })} min={0} />
+          <NumberField label="Rod size" unit="M" value={s.leveler.rod} onChange={(rod) => up({ leveler: { ...s.leveler, rod: Math.round(rod) } })} min={6} />
+          <NumberField label="Foot block" value={s.leveler.block} onChange={(block) => up({ leveler: { ...s.leveler, block } })} min={30} />
+        </div>
+        <p className="hint">
+          At the design height the feet hold the casters half the travel off the floor, so every deck can go that far up or down to meet the outfeed
+          tables.
+        </p>
       </section>
       <section className="section">
         <h2>Room</h2>
