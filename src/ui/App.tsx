@@ -4,6 +4,7 @@ import { useDerived } from '../useDerived'
 import { Header } from './Header'
 import { Inspector } from './Inspector'
 import { Sidebar } from './Sidebar'
+import { ViewBoundary, ViewLoading } from './ViewBoundary'
 
 const LayoutView = lazy(() => import('../three/LayoutView'))
 const CutPlan = lazy(() => import('../cutplan/CutPlan'))
@@ -32,7 +33,11 @@ export function App() {
       <Header derived={derived} />
       <Sidebar derived={derived} />
       <main className="main">
-        <Suspense fallback={null}>{tab === 'layout' ? <LayoutView derived={derived} /> : <CutPlan derived={derived} />}</Suspense>
+        <ViewBoundary resetKey={tab}>
+          <Suspense fallback={<ViewLoading what={tab === 'layout' ? '3D shop layout' : 'cut plan'} />}>
+            {tab === 'layout' ? <LayoutView derived={derived} /> : <CutPlan derived={derived} />}
+          </Suspense>
+        </ViewBoundary>
       </main>
       <Inspector derived={derived} />
     </div>

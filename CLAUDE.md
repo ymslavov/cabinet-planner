@@ -17,7 +17,8 @@ will be trusted.
 Node is only available via nvm — prefix shells with
 `export PATH="$HOME/.nvm/versions/node/v24.13.0/bin:$PATH"`.
 
-- `npm run dev` — dev server on http://localhost:5188
+- `./start` — starts the dev server (nvm PATH included) and opens the browser
+- `npm run dev` — dev server on http://127.0.0.1:5188 (strict port, IPv4)
 - `npm test` — engine + store unit tests (vitest)
 - `npm run build` — typecheck + production build
 - `npm run shot` — Playwright screenshots of both tabs into `shots/` (needs dev server)

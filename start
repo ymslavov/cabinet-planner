@@ -1,0 +1,12 @@
+#!/bin/zsh
+# Start Cabinet Planner and open it. Node lives only under nvm on this Mac.
+export PATH="$HOME/.nvm/versions/node/v24.13.0/bin:$PATH"
+cd "${0:A:h}"
+[ -d node_modules ] || npm install
+if curl -s -o /dev/null -m 2 http://127.0.0.1:5188/; then
+  echo "Already running at http://127.0.0.1:5188"
+else
+  (sleep 2 && open http://127.0.0.1:5188) &
+  exec npm run dev
+fi
+open http://127.0.0.1:5188

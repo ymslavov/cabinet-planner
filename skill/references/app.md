@@ -3,9 +3,15 @@
 ## Running
 
 ```bash
+~/projects/cabinet-planner/start   # Y's way in: sets the nvm PATH, starts the server, opens the browser
+```
+
+By hand:
+
+```bash
 export PATH="$HOME/.nvm/versions/node/v24.13.0/bin:$PATH"   # node only exists under nvm
 cd ~/projects/cabinet-planner
-npm run dev        # http://localhost:5188
+npm run dev        # http://127.0.0.1:5188 (localhost:5188 also works)
 npm test           # vitest: engine + store
 npm run build      # tsc -b + vite build → dist/
 npm run shot       # Playwright screenshots → shots/ (dev server must be running)
@@ -54,7 +60,7 @@ zustand vanilla store + `persist`, exposed as `planStore` and the `usePlan(selec
 |---|---|---|
 | Header | `Header.tsx` | Title, tabs (Shop layout / Cut plan), the **tape** stock gauge, Export / Import / Reset |
 | Left | `Sidebar.tsx` | Cabinets (lettered A, B … = part-code prefix), existing furniture, tools, "Shop settings and stock", Checks (click a check to select its object) |
-| Centre | `three/LayoutView.tsx` / `cutplan/CutPlan.tsx` | Lazy-loaded per tab |
+| Centre | `three/LayoutView.tsx` / `cutplan/CutPlan.tsx` | Lazy-loaded per tab, inside `ViewBoundary` (shows "Loading the …" while the chunk loads, and an error panel instead of a blank area if the view crashes — e.g. no WebGL) |
 | Right | `Inspector.tsx` | Form for the selection: cabinet, fixture, tool or settings |
 | Fields | `fields.tsx` | `NumberField` commits on blur/Enter, Escape reverts; `ConfirmButton` = click twice within 3 s (no dialogs anywhere) |
 

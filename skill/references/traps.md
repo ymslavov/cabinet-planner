@@ -46,3 +46,15 @@ Things that cost time. Newest at the bottom. Each entry: symptom → cause → f
 - **Every Playwright run starts with empty localStorage** (fresh browser context) — select
   things with `--click=` before clicking selection-dependent toolbar buttons (X-ray is
   disabled with nothing selected and the click times out).
+
+## Running it
+
+- **Y: "not loading"** (2026-09-26) → three things made the app look dead: (1) Vite bound
+  `localhost` to IPv6 `[::1]` only, so `http://127.0.0.1:5188` was refused; (2) the 3D view
+  was a blank grey area for several seconds while the dev server streamed a few hundred
+  three.js modules to a Chrome with extensions — no loading message; (3) any view crash
+  (e.g. no WebGL) would also have been blank. Fixes: `server.host: '127.0.0.1'` +
+  `strictPort` (fail loudly rather than drift to 5189), `ViewBoundary` with a loading
+  message and an error panel, and the `./start` script. When Y says it isn't loading, first
+  check `curl http://127.0.0.1:5188/` and look at the page in Y's Chrome (claude-in-chrome) —
+  headless Playwright loads it in < 1 s and hides the slowness.

@@ -990,3 +990,41 @@ table.parts small {
 table.parts tbody tr:hover {
   background: var(--tape-soft);
 }
+
+/* ---------- View loading / error ---------- */
+
+.view-message {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  color: var(--ink-2);
+  text-align: center;
+}
+
+.view-message h2 {
+  font-family: var(--font-cond);
+  font-weight: 600;
+  font-size: 22px;
+  color: var(--ink);
+  margin: 0;
+}
+
+.view-message p {
+  margin: 0;
+  max-width: 60ch;
+}
+
+.view-message pre {
+  background: var(--red-soft);
+  color: var(--red);
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  max-width: 80ch;
+  white-space: pre-wrap;
+  text-align: left;
+}
