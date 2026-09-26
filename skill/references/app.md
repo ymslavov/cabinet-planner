@@ -100,3 +100,17 @@ all-caps labels.
 - A cabinet the engine can't build (no parts) is drawn as a red translucent envelope.
 - Verified 2026-09-26 with Playwright: dragging E moved it (400, 900) → (1170, 1160) on the
   10 mm snap and R turned it 90°; no console errors.
+
+## Cut plan tab (`src/cutplan/CutPlan.tsx`)
+
+- **OSB sheets**: one SVG per nested sheet in sheet space (x = 2500 length = strong axis,
+  labelled under the sheet). Pieces are tinted per cabinet (legend above), labelled with the
+  part code and their **on-sheet** size (what you mark out), hatched background = waste,
+  offcuts ≥ 150 × 150 labelled with their size. Hovering a piece or a table row highlights
+  every piece with that code in yellow; the SVG `<title>` names the part and cabinet.
+- **Timber**: one row per bar, cuts left to right with code + length, kerf gaps between,
+  "N left" for offcuts ≥ 200. Bars say "to buy" while stock isn't entered.
+- **Parts by cabinet**: `partRows` groups identical parts; laminated OSB cleats show
+  "(3 strips per cleat)"; grain-locked parts say "(along the strong axis)".
+- Errors (pieces bigger than a sheet, more sheets than stock, timber oversize) appear as red
+  notes at the top of their section.

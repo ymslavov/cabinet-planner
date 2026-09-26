@@ -1,5 +1,5 @@
 // Screenshots of the running dev server for visual checks.
-// Usage: node scripts/shot.mjs [name] [--select=<cabinetId>] [--tab=cut] [--click=<text>]...
+// Usage: node scripts/shot.mjs [name] [--tab=cut] [--click=<text>]... [--scroll=<px>] (scrolls the cut plan)
 // Writes shots/<name>-<tab>.png. Needs `npm run dev` on :5188.
 import { chromium } from 'playwright'
 import { mkdirSync } from 'node:fs'
@@ -30,6 +30,7 @@ for (const tab of opt('tab').length ? opt('tab') : ['layout']) {
   if (tab === 'cut') await page.getByRole('tab', { name: 'Cut plan' }).click()
   if (tab === 'layout') await page.getByRole('tab', { name: 'Shop layout' }).click()
   await page.waitForTimeout(1200)
+  for (const y of opt('scroll')) await page.evaluate((y) => document.querySelector('.cutplan, .inspector')?.scrollTo(0, Number(y)), y)
   const file = `shots/${name}-${tab}.png`
   await page.screenshot({ path: file })
   console.log(file)
