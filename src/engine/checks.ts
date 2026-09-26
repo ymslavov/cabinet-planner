@@ -8,6 +8,8 @@ export interface Warning {
   /** Cabinet / fixture / tool the warning is about, for selection from the list. */
   objectId?: string
   message: string
+  /** Machine-readable kind for warnings the 3D view draws (a red feed strip). */
+  code?: 'feed-blocked'
 }
 
 /** A thing standing on the floor, reduced to what layout checks need. */
@@ -79,7 +81,8 @@ export function runChecks(
 ): Warning[] {
   const { settings: s } = state
   const out: Warning[] = []
-  const add = (level: Warning['level'], message: string, objectId?: string) => out.push({ level, message, objectId })
+  const add = (level: Warning['level'], message: string, objectId?: string, code?: Warning['code']) =>
+    out.push({ level, message, objectId, code })
 
   // Per cabinet
   for (const c of state.cabinets) {
@@ -133,7 +136,7 @@ export function runChecks(
     for (const f of fps) {
       if (f.id === c.id) continue
       if (overlaps(strip, f) && f.top > strip.top + TOL)
-        add('warn', `${f.name} stands above the ${fmt(strip.top)} mm deck in ${c.name}'s feed path`, c.id)
+        add('warn', `${f.name} stands above the ${fmt(strip.top)} mm deck in ${c.name}'s feed path`, c.id, 'feed-blocked')
     }
   }
 

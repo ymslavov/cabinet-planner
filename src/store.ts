@@ -21,6 +21,9 @@ export interface ViewPrefs {
 export interface PlanStore extends PlanState {
   selection: Selection
   view: ViewPrefs
+  /** Bumped to ask the 3D view to re-frame everything (not persisted). */
+  fitNonce: number
+  requestFit: () => void
   select: (sel: Selection) => void
   setView: (patch: Partial<ViewPrefs>) => void
   updateSettings: (patch: Partial<Settings>) => void
@@ -130,6 +133,8 @@ export function createPlanStore(storage: StateStorage) {
         ...seedState(),
         selection: null,
         view: defaultView,
+        fitNonce: 0,
+        requestFit: () => set((st) => ({ fitNonce: st.fitNonce + 1 })),
 
         select: (selection) => set({ selection }),
         setView: (patch) => set((st) => ({ view: { ...st.view, ...patch } })),

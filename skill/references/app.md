@@ -76,3 +76,27 @@ stock"** and nothing else; red-pen `#C63A2F` for errors. Barlow for UI, Barlow C
 headings and dimension labels, tabular figures everywhere. OSB `#C9A66B` and timber
 `#E3C592` are the material colours in the model and the diagrams. Sentence case, no
 all-caps labels.
+
+## 3D layout (`src/three/`)
+
+| File | Role |
+|---|---|
+| `LayoutView.tsx` | Canvas, lights, floor + 100/1000 mm grid, room walls, work plane, feed strips, camera rig, toolbar, legend, label list |
+| `CabinetObject.tsx` | One cabinet: casters, every `Part` as a textured box with edges, the tool on top, selection box, dimension lines; x-ray + exploded view |
+| `ToolModel.tsx` | Primitive models per `tool.shape` at the real footprint/deck/overall height (table saw with blade/fence/guard, thicknesser with columns/head, sander with disc + belt, mitre saw with turntable/fence/Axial-Glide arm, drill press with column/table/head) |
+| `FixtureObject.tsx` | Existing furniture: grey body, light top, wheels; translucent while unmeasured |
+| `useFloorDrag.ts` | Click selects; drag slides on the floor plane with 10 mm snap, keeps the grab offset, disables orbit while dragging |
+| `labels.tsx` | Screen-space DOM labels projected each frame (letter tags, names, dimension values) |
+| `materials.ts` | Colours + procedural OSB strand texture; `osbTextureFor(size)` keeps strand scale constant per part |
+
+- Scene units are millimetres; camera near 20 / far 80 000. An object's group sits at
+  (x, 0, z) turned by `-rotation` about Y (clockwise seen from above).
+- **Camera**: "Top view" toggles a straight-down preset; "Fit all" re-frames the bounds of all
+  footprints (`fitNonce` in the store). Bounds changes alone (dragging) don't move the camera.
+- **Work plane**: translucent yellow plane at `targetHeight` over the layout. **Feed strips**:
+  green at deck height per feed-axis tool, red when a `feed-blocked` warning exists for it.
+- **X-ray** (selected cabinet): panels ghost to 16 % so the framing shows. **Exploded**:
+  parts pushed out 70 % from the carcass centre, top layers lifted, tool raised 420 mm.
+- A cabinet the engine can't build (no parts) is drawn as a red translucent envelope.
+- Verified 2026-09-26 with Playwright: dragging E moved it (400, 900) → (1170, 1160) on the
+  10 mm snap and R turned it 90°; no console errors.

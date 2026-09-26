@@ -28,3 +28,18 @@ Things that cost time. Newest at the bottom. Each entry: symptom → cause → f
   the Playwright npm version wants a newer browser build than the cache holds → run
   `npx playwright install chromium` once (≈95 MB).
 - The shot script launches Chromium with SwiftShader flags so WebGL renders headless.
+
+## 3D view (react-three-fiber / three)
+
+- **Labels disappeared and the console filled with "Attempted to synchronously unmount a root
+  while React was already rendering"** → drei `<Html>` makes one React root per label and
+  unmounts it inside React 19's commit phase → don't use `<Html>`. Labels are plain DOM in
+  `LabelLayer` over the canvas, positioned each frame by `LabelProjector` (`three/labels.tsx`).
+- **Toggling X-ray did nothing** → changing `transparent` on an existing three.js material
+  isn't picked up without a recompile → the material is keyed on the ghost state so React
+  remounts it.
+- **"PCFSoftShadowMap has been removed"** warning → r3f's `shadows` boolean asks for the removed
+  soft map → use `shadows="percentage"`.
+- **Every Playwright run starts with empty localStorage** (fresh browser context) — select
+  things with `--click=` before clicking selection-dependent toolbar buttons (X-ray is
+  disabled with nothing selected and the click times out).

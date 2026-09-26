@@ -608,3 +608,148 @@ textarea {
   background: var(--osb);
   font-size: 15px;
 }
+
+/* ---------- 3D scene ---------- */
+
+.scene {
+  position: absolute;
+  inset: 0;
+}
+
+.scene-toolbar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.scene-toolbar .group {
+  display: flex;
+  gap: 2px;
+  background: rgb(246 247 245 / 0.92);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 3px;
+}
+
+.scene-toolbar .btn {
+  border-color: transparent;
+  background: transparent;
+}
+
+.scene-toolbar .btn:disabled {
+  color: var(--ink-3);
+  cursor: default;
+}
+
+.scene-toolbar .btn[aria-pressed='true'] {
+  background: var(--tape-soft);
+  border-color: var(--tape-deep);
+}
+
+.scene-legend {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+  background: rgb(246 247 245 / 0.92);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 5px 10px;
+  font-size: 12.5px;
+}
+
+.scene-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scene-legend i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid rgb(0 0 0 / 0.15);
+}
+
+.scene-legend .muted {
+  color: var(--ink-2);
+}
+
+.label-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.scene-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  will-change: transform;
+}
+
+.obj-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink);
+  user-select: none;
+}
+
+.obj-label b {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--osb);
+  font-family: var(--font-cond);
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.2);
+}
+
+.obj-label span {
+  background: rgb(246 247 245 / 0.9);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.obj-label.selected b {
+  background: var(--tape);
+}
+
+.obj-label.fixture span {
+  color: var(--ink-2);
+}
+
+.obj-label em {
+  font-style: normal;
+  color: var(--amber);
+  font-weight: 600;
+}
+
+.dim-label {
+  font-family: var(--font-cond);
+  font-weight: 600;
+  font-size: 14px;
+  background: var(--tape);
+  color: var(--ink);
+  padding: 0 5px;
+  border-radius: 2px;
+  white-space: nowrap;
+  user-select: none;
+}
