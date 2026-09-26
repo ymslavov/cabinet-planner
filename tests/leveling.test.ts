@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { analyze } from '../src/engine/analyze'
+import { osbPieces } from '../src/engine/cutlist'
 import { cabinetHardware, hardwareTotals } from '../src/engine/hardware'
 import { cabinetParts, casterPositions, footPositions } from '../src/engine/parts'
 import { seedState } from '../src/engine/seed'
@@ -86,6 +87,15 @@ describe('foot parts', () => {
         expect(Math.hypot(dx, dz)).toBeGreaterThanOrEqual(swivel - 1e-6)
       }
     }
+  })
+
+  test('the cut list glues up one stick per cabinet and crosscuts it into the four blocks', () => {
+    const c = cab()
+    const parts = cabinetParts(c, dimsOf(c), s)
+    const codes = Object.fromEntries(parts.map((p, i) => [p.id, `C${i + 1}`]))
+    const feetPieces = osbPieces(parts, codes, s.kerf).filter((p) => p.id.includes('foot'))
+    expect(feetPieces).toHaveLength(5)
+    for (const p of feetPieces) expect([p.length, p.width]).toEqual([4 * 60 + 3 * 3, 60])
   })
 
   test('no feet part overlaps any other part', () => {

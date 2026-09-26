@@ -24,19 +24,43 @@ export function partCodes(cabinets: Cabinet[], parts: Record<string, Part[]>): R
   return codes
 }
 
-/** OSB pieces to nest: one per panel, `laminations` identical strips per laminated cleat. */
-export function osbPieces(parts: Part[], codes: Record<string, string>): NestPiece[] {
-  return parts
-    .filter((p) => p.material === 'osb')
-    .flatMap((p) =>
-      Array.from({ length: p.cut.laminations }, (_, k) => ({
+/**
+ * OSB pieces to nest: one per panel, `laminations` identical strips per laminated cleat.
+ * Foot blocks are not cut one square at a time: each cabinet's blocks come from `layers`
+ * sticks of block × (n·block + (n−1)·kerf) — glue the sticks into one stack, then crosscut it
+ * into the n blocks. Fewer, longer cuts (Y's priority) and a cleaner glue-up.
+ */
+export function osbPieces(parts: Part[], codes: Record<string, string>, kerf: number): NestPiece[] {
+  const out: NestPiece[] = []
+  const feetByCabinet = new Map<string, Part[]>()
+  for (const p of parts) {
+    if (p.material !== 'osb') continue
+    if (p.role === 'foot') {
+      feetByCabinet.set(p.cabinetId, [...(feetByCabinet.get(p.cabinetId) ?? []), p])
+      continue
+    }
+    for (let k = 0; k < p.cut.laminations; k++)
+      out.push({
         id: p.cut.laminations > 1 ? `${p.id}#${k + 1}` : p.id,
         label: codes[p.id] ?? p.label,
         length: p.cut.length,
         width: p.cut.width,
         canRotate: !p.grainLocked,
-      })),
-    )
+      })
+  }
+  for (const [cabinetId, feet] of feetByCabinet) {
+    const f = feet[0]
+    const label = feet.length > 1 ? `${codes[f.id]}–${codes[feet[feet.length - 1].id]}` : codes[f.id]
+    for (let k = 0; k < f.cut.laminations; k++)
+      out.push({
+        id: `${cabinetId}:foot-stick#${k + 1}`,
+        label: label ?? 'feet',
+        length: feet.length * f.cut.length + (feet.length - 1) * kerf,
+        width: f.cut.width,
+        canRotate: true,
+      })
+  }
+  return out
 }
 
 export function timberPieces(parts: Part[], codes: Record<string, string>): TimberPiece[] {

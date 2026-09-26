@@ -30,7 +30,7 @@ export interface Derived {
   hardware: { byCabinet: Record<string, HardwareItem[]>; totals: HardwareItem[] }
 }
 
-// Nesting runs 96 heuristics — skip it when only positions changed (dragging).
+// Nesting runs 288 heuristics — skip it when only positions changed (dragging).
 let nestMemo: { key: string; result: NestResult } | null = null
 function nestCached(pieces: NestPiece[], sheet: SheetSpec): NestResult {
   const key = JSON.stringify([pieces, sheet])
@@ -50,7 +50,7 @@ export function analyze(state: PlanState): Derived {
   const codes = partCodes(state.cabinets, parts)
   const all = state.cabinets.flatMap((c) => parts[c.id])
 
-  const nest = nestCached(osbPieces(all, codes), {
+  const nest = nestCached(osbPieces(all, codes, s.kerf), {
     length: s.sheet.length,
     width: s.sheet.width,
     kerf: s.kerf,

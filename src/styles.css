@@ -1028,3 +1028,90 @@ table.parts tbody tr:hover {
   white-space: pre-wrap;
   text-align: left;
 }
+
+.cp-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  margin: 0 0 12px;
+}
+
+.cp-stats div {
+  display: flex;
+  flex-direction: column;
+}
+
+.cp-stats dt {
+  color: var(--ink-2);
+  font-size: 12.5px;
+}
+
+.cp-stats dd {
+  margin: 0;
+  font-family: var(--font-cond);
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.sheet .cut-line line {
+  stroke: var(--red);
+  stroke-width: 5;
+  stroke-dasharray: 26 14;
+}
+
+.sheet .cut-line circle {
+  fill: var(--surface);
+  stroke: var(--red);
+  stroke-width: 4;
+}
+
+.sheet .cut-line text {
+  font-family: var(--font-cond);
+  font-weight: 600;
+  font-size: 38px;
+  fill: var(--red);
+}
+
+.sheet .cut-line.active line {
+  stroke-width: 12;
+  stroke-dasharray: none;
+}
+
+.sheet .cut-line.active circle {
+  fill: var(--red);
+}
+
+.sheet .cut-line.active text {
+  fill: white;
+}
+
+.cut-list {
+  margin: 4px 0 8px;
+  font-size: 13px;
+}
+
+.cut-list summary {
+  cursor: pointer;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
+.cut-list ol {
+  margin: 6px 0 0;
+  padding-left: 28px;
+  columns: 2;
+  column-gap: 28px;
+}
+
+.cut-list li {
+  padding: 1px 0;
+  break-inside: avoid;
+}
+
+.cut-list li[data-active='true'] {
+  background: var(--red-soft);
+}
+
+.cut-list small {
+  color: var(--ink-2);
+}

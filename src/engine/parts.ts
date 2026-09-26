@@ -130,16 +130,16 @@ export function cabinetParts(cab: Cabinet, dims: CabinetDims, s: Settings): Part
     const n = footLayers(dims)
     const hb = n * t
     const half = s.leveler.block / 2
-    const names: Record<string, string> = { '-1,-1': 'back left', '1,-1': 'back right', '-1,1': 'front left', '1,1': 'front right' }
-    for (const [x, z] of footPositions(dims, s, cab.method)) {
+    const names: Record<string, string> = { '-1,-1': 'back-left', '1,-1': 'back-right', '-1,1': 'front-left', '1,1': 'front-right' }
+    footPositions(dims, s, cab.method).forEach(([x, z], i) => {
       const name = names[`${Math.sign(x)},${Math.sign(z)}`]
-      add(`foot-${name.replace(' ', '-')}`, `Foot block ${name}`, 'foot', [x - half, x + half, y0 - hb, y0, z - half, z + half], 'osb', {
+      add(`foot-${name}`, `Foot block ${i + 1}`, 'foot', [x - half, x + half, y0 - hb, y0, z - half, z + half], 'osb', {
         length: s.leveler.block,
         width: s.leveler.block,
         thickness: t,
         laminations: n,
       })
-    }
+    })
   }
 
   // Rear corner verticals + back rails (between the verticals)

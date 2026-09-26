@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Derived } from '../engine/analyze'
 import { cabinetLetter, partRows } from '../engine/cutlist'
-import type { NestedSheet } from '../engine/nest'
+import { USABLE_OFFCUT, type Cut, type NestedSheet } from '../engine/nest'
 import type { TimberBar } from '../engine/timber'
 import { usePlan } from '../store'
 
@@ -19,8 +19,10 @@ function SheetDiagram(props: {
   labelOf: Record<string, string>
   hover: string | null
   setHover: (code: string | null) => void
+  showCuts: boolean
 }) {
-  const { sheet, index, length, width, codeCabinet, labelOf, hover, setHover } = props
+  const { sheet, index, length, width, codeCabinet, labelOf, hover, setHover, showCuts } = props
+  const [activeCut, setActiveCut] = useState<number | null>(null)
   const used = sheet.usedArea / (length * width)
   const offcuts = sheet.freeRects.filter((r) => r.w >= MIN_OFFCUT && r.h >= MIN_OFFCUT)
   return (
@@ -28,7 +30,7 @@ function SheetDiagram(props: {
       <figcaption>
         <strong>Sheet {index + 1}</strong>
         <span>
-          {sheet.placements.length} pieces, {Math.round(used * 100)}% used
+          {sheet.placements.length} pieces, {Math.round(used * 100)}% used, {sheet.cuts.length} cuts
         </span>
       </figcaption>
       <svg viewBox={`-40 -40 ${length + 80} ${width + 120}`} role="img" aria-label={`Sheet ${index + 1} cutting diagram`}>
@@ -91,6 +93,10 @@ function SheetDiagram(props: {
             </g>
           )
         })}
+        {showCuts &&
+          sheet.cuts.map((c) => (
+            <CutLine key={c.n} cut={c} active={activeCut === c.n} onHover={setActiveCut} />
+          ))}
         {/* Sheet dimensions and the strong axis */}
         <text x={length / 2} y={width + 60} className="axis" textAnchor="middle">
           {length} mm, strong axis ⟶
@@ -99,7 +105,37 @@ function SheetDiagram(props: {
           {width}
         </text>
       </svg>
+      {sheet.cuts.length > 0 && (
+        <details className="cut-list">
+          <summary>Cut order ({sheet.cuts.length} cuts)</summary>
+          <ol>
+            {sheet.cuts.map((c) => (
+              <li key={c.n} onMouseEnter={() => setActiveCut(c.n)} onMouseLeave={() => setActiveCut(null)} data-active={activeCut === c.n}>
+                <b>{c.kind === 'rip' ? 'Rip' : 'Crosscut'}</b> the {Math.round(c.region.w)} × {Math.round(c.region.h)} piece{' '}
+                {Math.round(c.offset)} mm from its {c.kind === 'rip' ? 'bottom' : 'left'} edge
+                <small> ({(c.length / 1000).toFixed(2)} m cut)</small>
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
     </figure>
+  )
+}
+
+/** One cut on the diagram: a dashed line with its number in a circle at the start. */
+function CutLine({ cut, active, onHover }: { cut: Cut; active: boolean; onHover: (n: number | null) => void }) {
+  const r = 34
+  const cx = cut.kind === 'rip' ? cut.x1 + r + 6 : cut.x1
+  const cy = cut.kind === 'rip' ? cut.y1 : cut.y1 + r + 6
+  return (
+    <g className={`cut-line${active ? ' active' : ''}`} onMouseEnter={() => onHover(cut.n)} onMouseLeave={() => onHover(null)}>
+      <line x1={cut.x1} y1={cut.y1} x2={cut.x2} y2={cut.y2} />
+      <circle cx={cx} cy={cy} r={r} />
+      <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central">
+        {cut.n}
+      </text>
+    </g>
   )
 }
 
@@ -137,7 +173,9 @@ export default function CutPlan({ derived }: { derived: Derived }) {
   const cabinets = usePlan((s) => s.cabinets)
   const settings = usePlan((s) => s.settings)
   const [hover, setHover] = useState<string | null>(null)
+  const [showCuts, setShowCuts] = useState(true)
   const { nest, timber, codes } = derived
+  const st = nest.stats
 
   // code → cabinet index, code → part label
   const codeCabinet: Record<string, number> = {}
@@ -159,9 +197,34 @@ export default function CutPlan({ derived }: { derived: Derived }) {
           <p>
             {pieceCount} pieces nested on {nest.sheets.length} of your {settings.sheet.count} sheets ({settings.sheet.length} × {settings.sheet.width} ×{' '}
             {settings.sheet.thickness} mm), allowing {settings.kerf} mm per saw cut
-            {settings.edgeTrim > 0 ? ` and ${settings.edgeTrim} mm trimmed off each edge` : ''}. Every layout can be cut with straight, edge-to-edge
-            track-saw cuts. Hatched areas are offcuts.
+            {settings.edgeTrim > 0 ? ` and ${settings.edgeTrim} mm trimmed off each edge first` : ''}. Every layout is cut with straight, edge-to-edge
+            track-saw cuts in the numbered order. The plan uses the fewest sheets, then the fewest (so longest) cuts, and keeps the waste together
+            as big offcuts.
           </p>
+          {st.cuts > 0 && (
+            <dl className="cp-stats">
+              <div>
+                <dt>Cuts</dt>
+                <dd>
+                  {st.cuts}, averaging {(st.cutLength / st.cuts / 1000).toFixed(2)} m
+                </dd>
+              </div>
+              <div>
+                <dt>Largest offcut</dt>
+                <dd>{st.largestOffcut ? `${Math.round(st.largestOffcut.w)} × ${Math.round(st.largestOffcut.h)}` : 'none'}</dd>
+              </div>
+              <div>
+                <dt>Waste in usable offcuts</dt>
+                <dd>
+                  {st.wasteArea > 0 ? Math.round((100 * st.usableOffcutArea) / st.wasteArea) : 0}% (at least {USABLE_OFFCUT} mm wide)
+                </dd>
+              </div>
+            </dl>
+          )}
+          <label className="check" style={{ marginBottom: 12 }}>
+            <input type="checkbox" checked={showCuts} onChange={(e) => setShowCuts(e.target.checked)} />
+            Show numbered cuts on the diagrams
+          </label>
           <div className="cab-legend">
             {cabinets.map((c, i) => (
               <span key={c.id}>
@@ -194,6 +257,7 @@ export default function CutPlan({ derived }: { derived: Derived }) {
               labelOf={labelOf}
               hover={hover}
               setHover={setHover}
+              showCuts={showCuts}
             />
           ))}
           {nest.sheets.length === 0 && <p className="hint">No OSB parts yet. Add a cabinet to start.</p>}
@@ -291,14 +355,22 @@ export default function CutPlan({ derived }: { derived: Derived }) {
                           <td className="codes">{r.codes.join(' ')}</td>
                           <td>
                             {r.label}
-                            {r.laminations > 1 && <small> ({r.laminations} {r.role === 'foot' ? 'layers glued up per block' : 'strips per cleat'})</small>}
+                            {r.role === 'foot' ? (
+                              <small>
+                                {' '}
+                                (cut as {r.laminations} sticks of {Math.round(r.width)} × {Math.round(r.codes.length * r.length + (r.codes.length - 1) * settings.kerf)}: glue
+                                them into a stack, then crosscut into {r.codes.length} blocks)
+                              </small>
+                            ) : (
+                              r.laminations > 1 && <small> ({r.laminations} strips per cleat)</small>
+                            )}
                             {r.grainLocked && <small> (along the strong axis)</small>}
                           </td>
                           <td>{r.material === 'osb' ? 'OSB' : 'Timber'}</td>
                           <td className="num">{Math.round(r.length * 10) / 10}</td>
                           <td className="num">{Math.round(r.width * 10) / 10}</td>
                           <td className="num">{Math.round(r.thickness * 10) / 10}</td>
-                          <td className="num">{r.pieces}</td>
+                          <td className="num">{r.role === 'foot' ? `${r.codes.length} blocks` : r.pieces}</td>
                         </tr>
                       ))}
                     </tbody>

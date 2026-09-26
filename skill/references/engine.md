@@ -29,25 +29,41 @@ PBD 40 (exempt, 800 typed) 380×400 / 800 / 670.
 
 ## Sheet nesting — `nest.ts` → `nestSheets(pieces, sheetSpec)`
 
-Guillotine free-rectangle packing (after Jylänki, "A Thousand Ways to Pack the Bin").
+Guillotine free-rectangle packing (after Jylänki, "A Thousand Ways to Pack the Bin") that
+keeps an explicit **cut tree** per sheet.
 
 - Sheet space: **x along the sheet length (2500, the OSB strong axis), y along the width**.
   A piece's `length` lies along x unless `rotated`. `canRotate: false` pins it (grain lock).
-- Each placement goes in the bottom-left of a free rectangle, which is then split into two
-  by one full-width or full-height cut — so every plan is cuttable with edge-to-edge track-saw
-  cuts. Kerf is left between neighbours and never against the sheet edge (a 2500 × 1500 piece
-  fits a sheet exactly). `trim` shrinks the usable area on all four edges.
-- Heuristics: 4 sort orders (area, long side, short side, perimeter) × 3 fit rules (best
-  area, best short side, best long side) × 8 split rules (`rip` = always rip full-length
-  strips first, `cross`, shorter/longer axis, shorter/longer leftover, min/max area).
-  96 runs; the winner has the fewest sheets, then the smallest used area on the last sheet
-  (one big offcut). `heuristic` in the result names the winner.
-- Pieces too big for an empty sheet in any allowed orientation go to `unplaced` up front;
-  the rest still nest.
-- Offcuts (`freeRects`) are not merged — merging can break guillotine-ness.
+  A **rip** runs along x (constant y), a **crosscut** along y (constant x).
+- Each placement goes in the bottom-left of a free rectangle, carved out with up to two
+  full-width/full-height cuts (`carve`) — every plan is edge-to-edge track-saw cuttable.
+  Kerf between neighbours, never against the sheet edge; `trim` shrinks the usable area.
+  A cut is made whenever a piece doesn't reach its region's edge, even if what's left is
+  thinner than the kerf.
+- `finishSheet` then **drops cuts that only separate waste from waste** (that waste merges
+  into one bigger offcut) and numbers the remaining cuts in pre-order — a region is always
+  cut before the pieces inside it. `sheet.cuts[]` carries the line, kind, length, the region
+  being cut and the offset from its bottom/left edge; `sheet.freeRects` are the merged offcuts.
+- Heuristics: fill 2 (`sequential` = fill one sheet before opening the next, so the waste
+  collects on the last sheet; `global` = best spot on any open sheet) × 4 sorts × 3 orientation
+  rules (`long-x` long side along the sheet → strip layouts, `free`, `long-y`) × 3 fit rules ×
+  8 split rules = 576 runs (~40 ms for the timber-cleat seed, ~300 ms for osb-cleat).
+- **Choosing** (Y's priorities, 2026-09-26: easy cuts first, then big offcuts, never more
+  material): fewest sheets; then lowest `cuts × (1 + 0.1 × share of waste NOT in usable
+  offcuts)` — a layout may take up to 10 % more cuts if that turns its slivers into usable
+  offcuts; then largest offcut; then longer total cut length. Usable = short side ≥ 300
+  (`USABLE_OFFCUT`). `result.stats` = cuts, cutLength, largestOffcut, usableOffcutArea,
+  wasteArea; `heuristic` names the winner (`fill/sort/orient/fit/split`).
+- Pieces too big for an empty sheet in any allowed orientation go to `unplaced` up front.
 - Deterministic: ties break on piece id.
+- Tests replay every cut list (`replayCuts` in `tests/nest.test.ts`): each cut must span one
+  whole region, and every piece must come out exactly.
 
-Kerf fixture: 20 × (1250 × 750) → 7 sheets at 3 mm kerf (3 per sheet), 5 sheets at 0 kerf.
+Fixtures: 20 × (1250 × 750) → 7 sheets at 3 mm kerf, 5 at 0; one 800 × 600 piece → 2 cuts,
+turned and crosscut first to leave a 1897 × 1500 offcut; six 2500 × 200 strips → 6 rips.
+
+Seed numbers after this change (timber cleats, feet): 4 sheets (3.74), 92 cuts averaging
+0.76 m, largest offcut 2500 × 334, 53 % of the waste in usable offcuts.
 
 ## Timber — `timber.ts` → `packTimber(pieces, stock, { kerf, defaultLength })`
 
@@ -67,8 +83,11 @@ was entered — from unlimited `defaultLength` bars (3000).
 - **Part codes**: cabinets are lettered in list order (A, B, …), parts numbered in generator
   order → `A1`, `A2`, … `B1`. Codes label the sheet diagrams, timber bars and parts table.
   Reordering cabinets renames codes — print the cut plan after the design is final.
-- `osbPieces`: one nest piece per OSB panel; a laminated OSB cleat becomes `laminations`
-  identical strips sharing the part's code (ids `…#1..#3`).
+- `osbPieces(parts, codes, kerf)`: one nest piece per OSB panel; a laminated OSB cleat
+  becomes `laminations` identical strips sharing the part's code (ids `…#1..#3`). **Foot
+  blocks are ganged**: per cabinet, `layers` sticks of block × (n·block + (n−1)·kerf), labelled
+  with the code range (e.g. `A7–A10`) — glue the sticks into a stack, then crosscut it into
+  the n blocks. 5 sticks instead of 20 little squares per cabinet.
 - `partRows`: identical parts of a cabinet grouped for the table (label stripped of
   left/right/numbers).
 
