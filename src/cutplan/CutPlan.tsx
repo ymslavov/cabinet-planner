@@ -288,8 +288,8 @@ export default function CutPlan({ derived }: { derived: Derived }) {
         <header className="cp-head">
           <h2>Hardware to buy</h2>
           <p>
-            For all cabinets. Each levelling foot is a rod through a T-nut in its OSB foot block: a dome nut on the floor end, a lock nut under
-            the T-nut, and two nuts locked together inside the cabinet to turn it with a socket.
+            For all cabinets. The shim stacks are what set each deck to the outfeed height: slotted packers slide in around the tool's bolts
+            once they are loosened.
           </p>
         </header>
         {derived.hardware.totals.length === 0 ? (
@@ -321,7 +321,7 @@ export default function CutPlan({ derived }: { derived: Derived }) {
       <section className="cp-section">
         <header className="cp-head">
           <h2>Parts by cabinet</h2>
-          <p>Codes match the diagrams. Laminated OSB cleats and foot blocks are listed as strips or layers: glue that many face to face per part.</p>
+          <p>Codes match the diagrams. Laminated OSB cleats are listed as strips: glue that many face to face per cleat.</p>
         </header>
         {cabinets.map((c, i) => {
           const rows = partRows(derived.parts[c.id] ?? [], codes)
@@ -355,22 +355,14 @@ export default function CutPlan({ derived }: { derived: Derived }) {
                           <td className="codes">{r.codes.join(' ')}</td>
                           <td>
                             {r.label}
-                            {r.role === 'foot' ? (
-                              <small>
-                                {' '}
-                                (cut as {r.laminations} sticks of {Math.round(r.width)} × {Math.round(r.codes.length * r.length + (r.codes.length - 1) * settings.kerf)}: glue
-                                them into a stack, then crosscut into {r.codes.length} blocks)
-                              </small>
-                            ) : (
-                              r.laminations > 1 && <small> ({r.laminations} strips per cleat)</small>
-                            )}
+                            {r.laminations > 1 && <small> ({r.laminations} strips per cleat)</small>}
                             {r.grainLocked && <small> (along the strong axis)</small>}
                           </td>
                           <td>{r.material === 'osb' ? 'OSB' : 'Timber'}</td>
                           <td className="num">{Math.round(r.length * 10) / 10}</td>
                           <td className="num">{Math.round(r.width * 10) / 10}</td>
                           <td className="num">{Math.round(r.thickness * 10) / 10}</td>
-                          <td className="num">{r.role === 'foot' ? `${r.codes.length} blocks` : r.pieces}</td>
+                          <td className="num">{r.pieces}</td>
                         </tr>
                       ))}
                     </tbody>

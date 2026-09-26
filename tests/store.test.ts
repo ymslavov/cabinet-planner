@@ -96,6 +96,23 @@ describe('plan store', () => {
     expect(st.cabinets.filter((c) => c.toolId === 'hms850')).toHaveLength(1)
   })
 
+  test('a v3 save with levelling feet loads without them', async () => {
+    const storage = memoryStorage()
+    const a = createPlanStore(storage)
+    const saved = JSON.parse(storage.getItem(STORAGE_KEY) ?? JSON.stringify({ state: a.getState(), version: 4 }))
+    saved.version = 3
+    saved.state.cabinets = saved.state.cabinets.map((c: object) => ({ ...c, levelers: true }))
+    saved.state.settings.leveler = { travel: 30, rod: 12, block: 60 }
+    delete saved.state.settings.shimAllowance
+    storage.setItem(STORAGE_KEY, JSON.stringify(saved))
+    const b = createPlanStore(storage)
+    await b.persist.rehydrate()
+    const st = b.getState()
+    expect(st.cabinets.every((c) => !('levelers' in c))).toBe(true)
+    expect('leveler' in st.settings).toBe(false)
+    expect(st.settings.shimAllowance).toBe(10)
+  })
+
   test('reset restores the seed', () => {
     const store = fresh()
     store.getState().removeCabinet('cab-gts10')

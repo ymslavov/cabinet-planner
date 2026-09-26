@@ -16,9 +16,11 @@ Keep this current: tick things off with a date, add what Y asks for. Newest deci
 
 ## Built (2026-09-26, branch build/initial → main)
 
-- Scheppach HMS 850 planer-thicknesser (schema v2), levelling feet + hardware list (schema v3).
+- Scheppach HMS 850 planer-thicknesser (schema v2), hardware list.
+- Height trimming with slotted shims under each tool (schema v4) — replaced the levelling
+  feet of v3, which Y rejected: the cabinets stay on their casters.
 - Cut planning: explicit cut tree, numbered cut order, fewest/longest cuts and consolidated
-  offcuts preferred; foot blocks ganged into glue-up sticks.
+  offcuts preferred.
 - If nesting ever feels slow while typing (osb-cleat ≈ 300 ms in node), move `nestSheets`
   into a Web Worker.
 

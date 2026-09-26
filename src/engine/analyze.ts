@@ -50,7 +50,7 @@ export function analyze(state: PlanState): Derived {
   const codes = partCodes(state.cabinets, parts)
   const all = state.cabinets.flatMap((c) => parts[c.id])
 
-  const nest = nestCached(osbPieces(all, codes, s.kerf), {
+  const nest = nestCached(osbPieces(all, codes), {
     length: s.sheet.length,
     width: s.sheet.width,
     kerf: s.kerf,

@@ -5,9 +5,9 @@ Plan rolling OSB base cabinets for workshop machines in 3D, then get the cut pla
 **Live:** https://ymslavov.github.io/cabinet-planner/
 
 - Every machine's deck lands on one shared work height, so each base doubles as infeed and
-  outfeed support for the others. DIY levelling feet fine-tune each cabinet to meet existing
-  outfeed tables.
-- Cabinets are generated part by part (panels, cleats, shelves, laminated tops, foot blocks)
+  outfeed support for the others. The cabinets roll on casters; each tool sits on slotted shim
+  stacks so its deck can be trimmed ±10 mm to meet existing outfeed tables.
+- Cabinets are generated part by part (panels, cleats, shelves, laminated tops)
   in three build methods: laminated OSB cleats, timber cleats, or a timber frame.
 - The 3D shop layout shows the machines, cabinets and outfeed tables at real size. Drag to
   move, R to turn, and check feed paths and the work plane.

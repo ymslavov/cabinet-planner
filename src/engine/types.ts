@@ -32,11 +32,10 @@ export interface Settings {
   osbCleat: { width: number; laminations: number }
   topLayers: number
   /**
-   * DIY levelling feet: `travel` = total height adjustment of the M`rod` threaded rods; at the
-   * design height the feet hold the casters travel/2 off the floor, so the deck can go
-   * ±travel/2. `block` = side of the square OSB foot block the rod runs through.
+   * Tool cabinets are built this much low and the tool sits on a stack of slotted shims this
+   * thick, so each deck can be trimmed ±shimAllowance to meet the outfeed tables.
    */
-  leveler: { travel: number; rod: number; block: number }
+  shimAllowance: number
   /** Length of the infeed/outfeed strip drawn on each side of feed-axis tools. */
   feedLength: number
   room: { enabled: boolean; width: number; length: number }
@@ -78,8 +77,6 @@ export interface Cabinet {
   /** Height of each shelf's top face above the inside floor (top of the bottom panel). */
   shelves: number[]
   hasBack: boolean
-  /** Four levelling feet beside the casters; the cabinet stands on them when working. */
-  levelers: boolean
   overrides: CabinetOverrides
   x: number
   z: number
@@ -115,11 +112,9 @@ export interface CabinetDims {
   /** From the top of the casters to the underside of the top. */
   carcassHeight: number
   casterHeight: number
-  /** Floor to the underside of the bottom panel at the design height (caster + lift). */
-  baseHeight: number
-  /** How far the feet hold the casters off the floor at the design height (0 without feet). */
-  lift: number
-  /** Reachable range of the deck (or top, without a tool) with the feet; null without feet. */
+  /** Nominal shim stack under the tool (0 for exempt tools and plain cabinets). */
+  shim: number
+  /** Deck range from no shims to a double stack; null when not shimmed. */
   adjust: { min: number; max: number } | null
   /** Sheet thickness in use. */
   t: number
@@ -136,7 +131,6 @@ export type PartRole =
   | 'cleat'
   | 'post'
   | 'rail'
-  | 'foot'
 
 export interface Part {
   id: string

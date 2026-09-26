@@ -5,7 +5,8 @@ import { seedState } from '../src/engine/seed'
 import type { BuildMethod, Cabinet, Part, Settings } from '../src/engine/types'
 
 const state = seedState()
-const s = state.settings
+// Panel sizes below are the sheet's, which has no shim allowance.
+const s = { ...state.settings, shimAllowance: 0 }
 const gts = state.tools.find((t) => t.id === 'gts10')!
 const METHODS: BuildMethod[] = ['osb-cleat', 'timber-cleat', 'timber-frame']
 
@@ -17,7 +18,6 @@ const cab = (extra: Partial<Cabinet> = {}): Cabinet => ({
   casterHeight: 100,
   shelves: [200],
   hasBack: true,
-  levelers: false,
   overrides: {},
   x: 0,
   z: 0,

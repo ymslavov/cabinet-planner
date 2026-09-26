@@ -37,7 +37,7 @@ function PartMesh({ part, xray, position }: { part: Part; xray: boolean; positio
   )
 }
 
-/** Casters at the corners; with levelling feet they hang `lift` mm above the floor. */
+/** Casters at the corners. */
 function Casters({ dims }: { dims: CabinetDims }) {
   const h = dims.casterHeight
   if (h <= 0) return null
@@ -46,7 +46,7 @@ function Casters({ dims }: { dims: CabinetDims }) {
   return (
     <>
       {casterPositions(dims).map(([x, z], i) => (
-        <group key={i} position={[x, dims.lift, z]}>
+        <group key={i} position={[x, 0, z]}>
           <mesh position={[0, h - 4, 0]}>
             <boxGeometry args={[plate, 8, plate]} />
             <meshStandardMaterial color={COLORS.steel} metalness={0.6} roughness={0.3} />
@@ -65,29 +65,19 @@ function Casters({ dims }: { dims: CabinetDims }) {
   )
 }
 
-/** Levelling rods: from the floor up through each foot block to the double nut inside. */
-function FootRods({ dims, parts, rod }: { dims: CabinetDims; parts: Part[]; rod: number }) {
-  const feet = parts.filter((p) => p.role === 'foot')
-  const top = dims.baseHeight + dims.t + 30
+/** Slotted shim stacks under the tool's four corners. */
+function ShimStacks({ tool, y, shim }: { tool: Tool; y: number; shim: number }) {
+  const pad = 40
   return (
     <>
-      {feet.map((f) => (
-        <group key={f.id} position={[f.center[0], 0, f.center[2]]}>
-          <mesh position={[0, top / 2, 0]}>
-            <cylinderGeometry args={[rod / 2, rod / 2, top, 12]} />
-            <meshStandardMaterial color={COLORS.steel} metalness={0.8} roughness={0.25} />
+      {[-1, 1].flatMap((sx) =>
+        [-1, 1].map((sz) => (
+          <mesh key={`${sx}${sz}`} position={[sx * (tool.baseWidth / 2 - pad / 2 - 5), y + shim / 2, sz * (tool.baseLength / 2 - pad / 2 - 5)]}>
+            <boxGeometry args={[pad, shim, pad]} />
+            <meshStandardMaterial color={COLORS.shim} roughness={0.6} />
           </mesh>
-          {/* Dome-nut foot on the floor and the double-nut turning head inside */}
-          <mesh position={[0, 6, 0]}>
-            <sphereGeometry args={[rod * 0.9, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
-            <meshStandardMaterial color={COLORS.rubber} />
-          </mesh>
-          <mesh position={[0, top - 12, 0]}>
-            <cylinderGeometry args={[rod, rod, 20, 6]} />
-            <meshStandardMaterial color={COLORS.steelDark} metalness={0.7} roughness={0.3} />
-          </mesh>
-        </group>
-      ))}
+        )),
+      )}
     </>
   )
 }
@@ -134,7 +124,7 @@ export function DimensionLines({ specs }: { specs: DimSpec[] }) {
 /** Height of the label above a cabinet's floor point: over the tool, or over the top. */
 export function cabinetLabelHeight(dims: CabinetDims, tool: Tool | undefined, exploded: boolean): number {
   const topY = Math.max(dims.surfaceHeight, 10)
-  return topY + (tool ? tool.overallHeight : 0) + (exploded ? 420 : 0) + 120
+  return topY + dims.shim + (tool ? tool.overallHeight : 0) + (exploded ? 420 : 0) + 120
 }
 
 export function CabinetObject(props: {
@@ -145,12 +135,11 @@ export function CabinetObject(props: {
   selected: boolean
   xray: boolean
   explode: boolean
-  rodSize: number
 }) {
-  const { cab, dims, parts, tool, selected, xray, explode, rodSize } = props
+  const { cab, dims, parts, tool, selected, xray, explode } = props
   const drag = useFloorDrag('cabinet', cab.id)
   const [hover, setHover] = useState(false)
-  const pivotY = dims.baseHeight + dims.carcassHeight / 2
+  const pivotY = dims.casterHeight + dims.carcassHeight / 2
   const factor = selected && explode ? 0.7 : 0
   const toolLift = factor ? 420 : 0
   const valid = parts.length > 0
@@ -175,7 +164,6 @@ export function CabinetObject(props: {
       }}
     >
       <Casters dims={dims} />
-      {!factor && <FootRods dims={dims} parts={parts} rod={rodSize} />}
       {valid ? (
         parts.map((p) => (
           <PartMesh key={p.id} part={p} xray={selected && xray} position={factor ? explodedCenter(p, pivotY, factor) : p.center} />
@@ -188,9 +176,12 @@ export function CabinetObject(props: {
         </mesh>
       )}
       {tool && (
-        <group position={[0, topY + toolLift, 0]}>
-          <ToolModel tool={tool} />
-        </group>
+        <>
+          {dims.shim > 0 && <ShimStacks tool={tool} y={topY + toolLift} shim={dims.shim} />}
+          <group position={[0, topY + toolLift + dims.shim, 0]}>
+            <ToolModel tool={tool} />
+          </group>
+        </>
       )}
       {(selected || hover) && (
         <mesh position={[0, labelY / 2 - 60, 0]}>

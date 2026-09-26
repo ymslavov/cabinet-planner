@@ -5,7 +5,7 @@ import { defaultSettings, planerSeed, seedState } from './engine/seed'
 import type { Cabinet, Fixture, PlanState, Rotation, Settings, Tool } from './engine/types'
 
 export const STORAGE_KEY = 'cabinet-planner'
-export const SCHEMA_VERSION = 3
+export const SCHEMA_VERSION = 4
 
 export type Selection = { kind: 'cabinet' | 'fixture' | 'tool'; id: string } | { kind: 'settings' } | null
 
@@ -111,7 +111,6 @@ function withDefaults(state: PlanState): PlanState {
       timber: { ...d.timber, ...s.timber },
       osbCleat: { ...d.osbCleat, ...s.osbCleat },
       room: { ...d.room, ...s.room },
-      leveler: { ...d.leveler, ...s.leveler },
     },
   }
 }
@@ -125,14 +124,11 @@ function migrate(state: PlanState, fromVersion: number): PlanState {
     if (!st.tools.some((t) => t.id === tool.id)) st = { ...st, tools: [...st.tools, tool] }
     if (!st.cabinets.some((c) => c.toolId === tool.id)) st = { ...st, cabinets: [...st.cabinets, cabinet] }
   }
-  if (fromVersion < 3) {
-    // v3: levelling feet — on for every cabinet on the shared plane, off for exempt tools.
-    st = {
-      ...st,
-      cabinets: st.cabinets.map((c) =>
-        c.levelers === undefined ? { ...c, levelers: !st.tools.find((t) => t.id === c.toolId)?.exempt } : c,
-      ),
-    }
+  if (fromVersion < 4) {
+    // v3 briefly had levelling feet; v4 replaced them with shims under the tool (Y, 2026-09-26).
+    st = { ...st, cabinets: st.cabinets.map(({ levelers: _drop, ...c }: Cabinet & { levelers?: boolean }) => c) }
+    const { leveler: _gone, ...settings } = st.settings as Settings & { leveler?: unknown }
+    st = { ...st, settings }
   }
   return withDefaults(st)
 }
@@ -167,7 +163,6 @@ export function createPlanStore(storage: StateStorage) {
             casterHeight: 100,
             shelves: [200],
             hasBack: true,
-            levelers: !tool?.exempt,
             overrides: {},
             x: nextFreeX(get().cabinets, get().fixtures),
             z: 0,

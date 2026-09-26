@@ -9,19 +9,18 @@ here. Tests live in `tests/*.test.ts`; the sheet's own rows are the sizing fixtu
 |---|---|
 | width | `tool.baseWidth + 2 × clearance` (override wins) |
 | length | `tool.baseLength + 2 × clearance` (override wins) |
-| surfaceHeight | `targetHeight − tool.deckHeight`; exempt tool → `tool.fixedSurfaceHeight`; no tool → `targetHeight` (override wins) |
+| shim | `shimAllowance` for a tool on the shared plane, else 0 |
+| surfaceHeight | `targetHeight − tool.deckHeight − shim`; exempt tool → `tool.fixedSurfaceHeight`; no tool → `targetHeight` (override wins) |
 | topThickness | `topLayers × sheet.thickness` (measured thickness, not nominal) |
-| lift | `leveler.travel / 2` with levelling feet, else 0 |
-| baseHeight | `casterHeight + lift` (floor → underside of the bottom panel at design height) |
-| carcassHeight | `surfaceHeight − baseHeight − topThickness` |
-| adjust | with feet: `{ min: deck − lift, max: deck + travel − lift }` (top instead of deck without a tool); null without |
-| deckTop | `surfaceHeight + tool.deckHeight` (null without a tool) |
+| carcassHeight | `surfaceHeight − casterHeight − topThickness` |
+| adjust | shimmed: `{ min: deck − shim, max: deck + shim }` (no shims … double stack); null otherwise |
+| deckTop | `surfaceHeight + shim + tool.deckHeight` (null without a tool) |
 
 A tool-less cabinet defaults to 600 × 600 (`TOOLLESS_SIZE`). A non-positive carcass is
 returned, not thrown — `checks` reports it and `parts` yields nothing for that cabinet.
 
-The sheet has no feet: its fixtures below are tested with `levelers: false`; with feet on,
-every carcass is 15 mm shorter (e.g. GTS 10 XC 415 instead of 430).
+The sheet has no shims: its fixtures below are tested with `shimAllowance: 0`; with the
+default 10 every shimmed top and carcass is 10 mm lower (e.g. GTS 10 XC top 550, carcass 420).
 
 Fixtures from the sheet (100 mm casters, 2 × 15 top): GTS 10 XC 790×620 / 560 / 430,
 2012NB 530×420 / 710 / 580, BTS 700 530×440 / 670 / 540, GCM 8 SJL 610×480 / 805 / 675,
@@ -62,8 +61,9 @@ keeps an explicit **cut tree** per sheet.
 Fixtures: 20 × (1250 × 750) → 7 sheets at 3 mm kerf, 5 at 0; one 800 × 600 piece → 2 cuts,
 turned and crosscut first to leave a 1897 × 1500 offcut; six 2500 × 200 strips → 6 rips.
 
-Seed numbers after this change (timber cleats, feet): 4 sheets (3.74), 92 cuts averaging
-0.76 m, largest offcut 2500 × 334, 53 % of the waste in usable offcuts.
+Seed numbers (timber cleats, shims, 2026-09-26): 4 sheets (3.65), 61 cuts averaging 1.03 m,
+largest offcut 1316 × 485, 35 % of the waste in usable offcuts. (With the short-lived foot
+blocks it was 92 cuts — 100 little squares cost 30 cuts.)
 
 ## Timber — `timber.ts` → `packTimber(pieces, stock, { kerf, defaultLength })`
 
@@ -83,11 +83,8 @@ was entered — from unlimited `defaultLength` bars (3000).
 - **Part codes**: cabinets are lettered in list order (A, B, …), parts numbered in generator
   order → `A1`, `A2`, … `B1`. Codes label the sheet diagrams, timber bars and parts table.
   Reordering cabinets renames codes — print the cut plan after the design is final.
-- `osbPieces(parts, codes, kerf)`: one nest piece per OSB panel; a laminated OSB cleat
-  becomes `laminations` identical strips sharing the part's code (ids `…#1..#3`). **Foot
-  blocks are ganged**: per cabinet, `layers` sticks of block × (n·block + (n−1)·kerf), labelled
-  with the code range (e.g. `A7–A10`) — glue the sticks into a stack, then crosscut it into
-  the n blocks. 5 sticks instead of 20 little squares per cabinet.
+- `osbPieces(parts, codes)`: one nest piece per OSB panel; a laminated OSB cleat becomes
+  `laminations` identical strips sharing the part's code (ids `…#1..#3`).
 - `partRows`: identical parts of a cabinet grouped for the table (label stripped of
   left/right/numbers).
 
@@ -96,8 +93,8 @@ was entered — from unlimited `defaultLength` bars (3000).
 | Level | Fires when |
 |---|---|
 | error | carcass ≤ 0; cabinet too small for its framing; more sheets than `sheet.count`; a piece fits no sheet; timber shortfall (stock entered); timber piece longer than any bar |
-| warn | deck off the target plane (±0.5); feet on but no room for them; **tipping**: narrowest spread of wheels and feet < 0.2 × (top + tool height); fixture off the plane *beyond* the feet's reach; tool base bigger than the top; shelf outside `shelfRange`; no back; footprints overlap (touching is fine); outside the room; something **taller than the deck** inside a feed path; fixture top ≠ target; cabinet's tool deleted |
-| info | MEASURE for unmeasured tools/fixtures; timber stock not entered; fixture off the plane but within every levelled cabinet's range ("wind the feet down 5 mm") |
+| warn | deck off the target plane (±0.5); **tipping**: caster wheelbase < 0.2 × (top + tool height); fixture off the plane *beyond* the shims' ±allowance; tool base bigger than the top; shelf outside `shelfRange`; no back; footprints overlap (touching is fine); outside the room; something **taller than the deck** inside a feed path; fixture top ≠ target; cabinet's tool deleted |
+| info | MEASURE for unmeasured tools/fixtures; timber stock not entered; fixture off the plane but within every shimmed cabinet's range ("take out 5 mm of shims") |
 
 Footprints use the rotated size (90°/270° swap width and length). A **feed path** exists for
 non-exempt tools with `feedAxis` x/z: a strip `tool base` wide, running `feedLength` (2500)
@@ -125,6 +122,5 @@ nesting of open boxes with one shelf each needs about half the stock.
 
 `cabinetHardware(cab, dims, parts, s)` per cabinet, `hardwareTotals(lists)` sums identical
 items (same key + spec). Every buildable cabinet: 4 braked casters, 16 caster bolts
-(M8 × ⌈t + 25⌉₁₀). With feet, per foot: rod, T-nut, 3 hex nuts, washer, dome nut + pad.
-Rod length = ⌈block + t + 30 (nuts inside) + (baseHeight + travel − lift − block)⌉₁₀ —
-180 mm for 100 mm casters and ±15 travel. `Derived.hardware = { byCabinet, totals }`.
+(M8 × ⌈t + 25⌉₁₀). Shimmed cabinets: 4 slotted shim stacks of `shimAllowance`.
+`Derived.hardware = { byCabinet, totals }`.

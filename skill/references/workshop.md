@@ -40,6 +40,8 @@ caster height is per cabinet in the app.
 | Bosch PBD 40 drill press | 330 × 350 | — | 380 × 400 | 800 (typed) | 670 | 11.2 kg, 650 tall; **exempt** from the plane, table adjustable; top-heavy |
 
 Cabinet = base + 2 × 25 mm clearance; surface = 900 − deck; carcass = surface − caster − top (2 × 15).
+The app additionally builds each tool cabinet 10 mm low and puts the tool on 10 mm slotted
+shims so the deck can be trimmed ±10 to the outfeed tables (the sheet doesn't model this).
 
 ## Accessories to store (drives shelf layout)
 

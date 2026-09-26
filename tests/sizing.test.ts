@@ -4,7 +4,8 @@ import { seedState } from '../src/engine/seed'
 import type { Cabinet } from '../src/engine/types'
 
 const state = seedState()
-const s = state.settings
+// The spreadsheet has no shim allowance.
+const s = { ...state.settings, shimAllowance: 0 }
 const tool = (id: string) => state.tools.find((t) => t.id === id)!
 const cab = (toolId: string | null, extra: Partial<Cabinet> = {}): Cabinet => ({
   id: 'c',
@@ -14,7 +15,6 @@ const cab = (toolId: string | null, extra: Partial<Cabinet> = {}): Cabinet => ({
   casterHeight: 100,
   shelves: [],
   hasBack: true,
-  levelers: false,
   overrides: {},
   x: 0,
   z: 0,

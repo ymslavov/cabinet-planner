@@ -16,6 +16,7 @@ export const COLORS = {
   rubber: '#2b2f33',
   red: '#c63a2f',
   feed: '#2f7d4f',
+  shim: '#5f86b5',
 }
 
 /** A procedural OSB texture: overlapping strands in a handful of wood tones. */

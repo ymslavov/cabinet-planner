@@ -162,28 +162,23 @@ function CabinetPanel({ cab, derived }: { cab: Cabinet; derived: Derived }) {
         </div>
       </section>
 
-      <section className="section">
-        <h2>Levelling feet</h2>
-        <Check label="Four feet beside the casters" checked={cab.levelers} onChange={(levelers) => up({ levelers })} />
-        {cab.levelers && d.adjust ? (
-          <>
-            <dl className="readout" style={{ marginTop: 10 }}>
-              <dt>{tool ? 'Deck' : 'Top'} can be set between</dt>
-              <dd>
-                {r(d.adjust.min)}–{r(d.adjust.max)} mm
-              </dd>
-              <dt>Casters off the floor at design height</dt>
-              <dd>{r(d.lift)} mm</dd>
-            </dl>
-            <p className="hint">
-              Wind the feet down to lift the cabinet off its wheels and match the outfeed; wind them up to roll it. Turn each rod from inside the
-              cabinet with a socket on its locked double nut.
-            </p>
-          </>
-        ) : (
-          <p className="hint">Off: the cabinet stands on its casters at a fixed height.</p>
-        )}
-      </section>
+      {d.shim > 0 && d.adjust && (
+        <section className="section">
+          <h2>Shims under the tool</h2>
+          <dl className="readout">
+            <dt>Nominal stack</dt>
+            <dd>{r(d.shim)} mm</dd>
+            <dt>Deck can be trimmed between</dt>
+            <dd>
+              {r(d.adjust.min)}–{r(d.adjust.max)} mm
+            </dd>
+          </dl>
+          <p className="hint">
+            The top is built {r(d.shim)} mm low and the tool sits on a stack of slotted shims at each corner. Loosen its bolts and take shims out
+            or add them to meet the outfeed; the cabinet stays on its casters.
+          </p>
+        </section>
+      )}
 
       <section className="section">
         <Position kind="cabinet" obj={cab} />
@@ -318,7 +313,12 @@ function SettingsPanel() {
           <NumberField label="Clearance each side" value={s.clearance} onChange={(clearance) => up({ clearance })} min={0} />
           <NumberField label="Infeed/outfeed length" value={s.feedLength} onChange={(feedLength) => up({ feedLength })} min={0} />
           <NumberField label="Top layers" unit="" value={s.topLayers} onChange={(topLayers) => up({ topLayers: Math.round(topLayers) })} min={1} max={4} />
+          <NumberField label="Shim allowance" value={s.shimAllowance} onChange={(shimAllowance) => up({ shimAllowance })} min={0} />
         </div>
+        <p className="hint">
+          Tool cabinets are built this much low and each tool sits on a shim stack this thick, so every deck can be trimmed up or down by it to meet
+          the outfeed tables.
+        </p>
       </section>
       <section className="section">
         <h2>OSB sheets</h2>
@@ -363,18 +363,6 @@ function SettingsPanel() {
         <button className="btn small" style={{ marginTop: 8 }} onClick={() => setStock([...stock, { length: s.timber.defaultLength, qty: 1 }])}>
           Add a length
         </button>
-      </section>
-      <section className="section">
-        <h2>Levelling feet</h2>
-        <div className="field-grid three">
-          <NumberField label="Height travel" value={s.leveler.travel} onChange={(travel) => up({ leveler: { ...s.leveler, travel } })} min={0} />
-          <NumberField label="Rod size" unit="M" value={s.leveler.rod} onChange={(rod) => up({ leveler: { ...s.leveler, rod: Math.round(rod) } })} min={6} />
-          <NumberField label="Foot block" value={s.leveler.block} onChange={(block) => up({ leveler: { ...s.leveler, block } })} min={30} />
-        </div>
-        <p className="hint">
-          At the design height the feet hold the casters half the travel off the floor, so every deck can go that far up or down to meet the outfeed
-          tables.
-        </p>
       </section>
       <section className="section">
         <h2>Room</h2>
