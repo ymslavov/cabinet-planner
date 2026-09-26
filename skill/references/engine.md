@@ -42,3 +42,16 @@ Guillotine free-rectangle packing (after Jylänki, "A Thousand Ways to Pack the 
 - Deterministic: ties break on piece id.
 
 Kerf fixture: 20 × (1250 × 750) → 7 sheets at 3 mm kerf (3 per sheet), 5 sheets at 0 kerf.
+
+## Timber — `timber.ts` → `packTimber(pieces, stock, { kerf, defaultLength })`
+
+Best-fit decreasing 1D packing. Pieces go longest first into the open bar with the least room
+that still fits (each cut consumes `length + kerf`; the last kerf may run off the end). A new
+bar comes from the **longest remaining stock length that fits**; when stock runs out — or none
+was entered — from unlimited `defaultLength` bars (3000).
+
+- `stockKnown` is false while Settings → Timber stock is empty; the bars are then a shopping
+  list and `shortfall` stays 0 (the budget shows "need N × 3 m" instead of an error).
+- `shortfall` = bars beyond the entered stock. `oversize` = pieces longer than every stock
+  length and the default length.
+- `totalLength` = Σ piece lengths, the linear metres the design consumes before kerf.
