@@ -64,5 +64,7 @@ store ──▶ sizing ──▶ parts ──┬──▶ 3D layout (src/three)
 
 As of 2026-09-26: `main` — 106 unit tests, schema v3. Six cabinets (the HMS 850 planer
 joined in v2), levelling feet on all but the drill press (v3). Seed design (six open boxes,
-timber cleats, one shelf each, feet) nests onto **4 of 7 sheets** (3.74) in 92 numbered cuts. All tool
+timber cleats, one shelf each, feet) nests onto **4 of 7 sheets** (3.74) in 92 numbered cuts.
+Published: https://ymslavov.github.io/cabinet-planner/ (public repo ymslavov/cabinet-planner,
+auto-deployed from `main` after the tests pass). All tool
 and outfeed dimensions are still sheet estimates — see `roadmap.md` → Waiting on Y.
