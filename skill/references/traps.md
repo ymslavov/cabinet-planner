@@ -11,3 +11,12 @@ Things that cost time. Newest at the bottom. Each entry: symptom → cause → f
   import `defineConfig` from `vitest/config` instead.
 - **TypeScript is pinned to ~5.9** on purpose: npm's `latest` is 7.x (the native port) and
   `tsc -b` behaviour/flags differ; don't bump casually.
+
+## Engine
+
+- **Nester packed 2 pieces/sheet where 3 fit** → when opening a new sheet it took the first
+  orientation that fit, not the best-scoring one → score orientations against the empty sheet
+  with the same fit rule (`nest.ts`, new-sheet branch). Test: "kerf is respected".
+- **A `cat > file` without a heredoc in a Bash call hangs forever** waiting on stdin — when
+  printing debug output from vitest, write the throwaway test with a heredoc into
+  `tests/_tmp/` and delete it afterwards (vitest only picks up `tests/**/*.test.ts`).
