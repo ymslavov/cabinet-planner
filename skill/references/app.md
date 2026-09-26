@@ -17,6 +17,18 @@ npm run build      # tsc -b + vite build → dist/
 npm run shot       # Playwright screenshots → shots/ (dev server must be running)
 ```
 
+## Published copy (GitHub Pages)
+
+- Repo: https://github.com/ymslavov/cabinet-planner (**public**). Live app:
+  https://ymslavov.github.io/cabinet-planner/
+- `.github/workflows/pages.yml` runs on every push to `main`: `npm ci` → `npm test` → `npm run build`
+  → deploy. A failing test blocks the deploy. Check with `gh run list -R ymslavov/cabinet-planner`.
+- `vite.config.ts` has `base: './'` so the same build works under `/cabinet-planner/` and locally.
+- The published app has its own `localStorage` (origin `ymslavov.github.io`): a visitor starts
+  from the seed plan. Move Y's real plan across with Export → Import.
+- Public repo: never commit anything private — it goes in `skill/references/private.md`
+  (git-ignored). The planning sheet's ID was scrubbed from history before the first push.
+
 ## Data model (`src/engine/types.ts`)
 
 `PlanState = { settings, tools[], cabinets[], fixtures[] }` — all millimetres.
