@@ -6,7 +6,7 @@ export type Rotation = 0 | 90 | 180 | 270
 /** How the carcass is held together. See skill/references/construction.md. */
 export type BuildMethod = 'osb-cleat' | 'timber-cleat' | 'timber-frame'
 
-export type ToolShape = 'tableSaw' | 'thicknesser' | 'sander' | 'mitreSaw' | 'drillPress' | 'generic'
+export type ToolShape = 'tableSaw' | 'thicknesser' | 'planer' | 'sander' | 'mitreSaw' | 'drillPress' | 'generic'
 
 export interface StockLength {
   length: number

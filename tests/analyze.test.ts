@@ -25,7 +25,7 @@ describe('analyze on the seed state', () => {
     const codes = Object.values(d.codes)
     expect(new Set(codes).size).toBe(codes.length)
     expect(codes).toContain('A1')
-    expect(codes).toContain('E1')
+    expect(codes).toContain('F1')
   })
 })
 

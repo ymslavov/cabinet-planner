@@ -85,6 +85,24 @@ function seedTools(): Tool[] {
       notes: 'Axial-Glide: no rear rails, can sit tight against a wall. Wants support wings left and right.',
     },
     {
+      id: 'hms850',
+      name: 'Scheppach HMS 850 planer-thicknesser',
+      shape: 'planer',
+      baseWidth: 790,
+      baseLength: 450,
+      // Scheppach's "working height": the surfacing (jointer) table above the machine's base.
+      deckHeight: 355,
+      overallHeight: 470,
+      weightKg: 21.75,
+      color: '#1d3f6e',
+      feedAxis: 'x',
+      exempt: false,
+      fixedSurfaceHeight: 800,
+      measured: false,
+      notes:
+        'Planer-thicknesser combo, 790 × 450 × 470, 21.75 kg (Scheppach spec). Deck = jointer table, 355 per spec — measure. Stock runs along the long side (left–right). Thicknessing bed sits lower, so the 900 plane supports jointing. Dust port 63 mm.',
+    },
+    {
       id: 'pbd40',
       name: 'Bosch PBD 40 drill press',
       shape: 'drillPress',
@@ -119,6 +137,26 @@ function cabinet(id: string, toolId: string, x: number, z: number, shelf: number
   }
 }
 
+/** In front of the row, clear of every other feed path; its own feed runs left–right. */
+const PLANER_CABINET: Cabinet = {
+  id: 'cab-hms850',
+  name: 'Planer base',
+  toolId: 'hms850',
+  method: 'timber-cleat',
+  casterHeight: 100,
+  shelves: [200],
+  hasBack: true,
+  overrides: {},
+  x: 0,
+  z: 2200,
+  rotation: 0,
+}
+
+/** Added in schema v2 — the store's migration adds them to older saves. */
+export function planerSeed(): { tool: Tool; cabinet: Cabinet } {
+  return { tool: seedTools().find((t) => t.id === 'hms850')!, cabinet: { ...PLANER_CABINET } }
+}
+
 // Starting layout: mitre saw against the back wall (its wings run along X), table saw and
 // thicknesser with an outfeed cabinet behind each, sander and drill press out of every feed path.
 function seedCabinets(): Cabinet[] {
@@ -128,6 +166,7 @@ function seedCabinets(): Cabinet[] {
     { ...cabinet('cab-gts10', 'gts10', -1500, 0, 200), name: 'Table saw base' },
     { ...cabinet('cab-2012nb', '2012nb', 1500, 0, 270), name: 'Thicknesser base' },
     { ...cabinet('cab-pbd40', 'pbd40', 400, 900, 320), name: 'Drill press base' },
+    PLANER_CABINET,
   ]
 }
 

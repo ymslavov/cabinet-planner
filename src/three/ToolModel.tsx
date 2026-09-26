@@ -83,6 +83,32 @@ function Thicknesser({ tool }: { tool: Tool }) {
   )
 }
 
+/** Planer-thicknesser (jointer on top, thicknesser inside). Tables run along X. */
+function Planer({ tool }: { tool: Tool }) {
+  const { baseWidth: W, baseLength: L, deckHeight: D, overallHeight: H, color } = tool
+  const tableW = Math.min(L * 0.5, 215)
+  const gap = 70
+  const tableLen = (W - gap) / 2
+  return (
+    <>
+      <Box size={[W * 0.62, D - 30, L * 0.8]} at={[0, (D - 30) / 2, 0]} color={color} />
+      {/* Infeed and outfeed jointer tables either side of the cutter block */}
+      {[-1, 1].map((s) => (
+        <Box key={s} size={[tableLen, 30, tableW]} at={[s * (gap / 2 + tableLen / 2), D - 15, L * 0.08]} color={COLORS.steel} metal />
+      ))}
+      <mesh position={[0, D - 30, L * 0.08]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[30, 30, tableW, 20]} />
+        <meshStandardMaterial color={COLORS.steelDark} metalness={0.6} roughness={0.3} />
+      </mesh>
+      {/* Fence along the back edge of the tables, bridge guard over the cutter */}
+      <Box size={[W * 0.55, H - D, 20]} at={[0, D + (H - D) / 2, L * 0.08 - tableW / 2 - 10]} color={COLORS.steel} metal />
+      <Box size={[90, 25, tableW * 0.9]} at={[0, D + 20, L * 0.08]} color="#e0a800" />
+      {/* Thicknesser crank */}
+      <Disc r={40} t={14} at={[W * 0.31 + 7, D * 0.6, 0]} axis="x" color={COLORS.rubber} />
+    </>
+  )
+}
+
 function Sander({ tool }: { tool: Tool }) {
   const { baseWidth: W, baseLength: L, deckHeight: D, overallHeight: H, color } = tool
   const beltLen = W * 0.75
@@ -172,6 +198,9 @@ export function ToolModel({ tool }: { tool: Tool }) {
       break
     case 'thicknesser':
       body = <Thicknesser tool={tool} />
+      break
+    case 'planer':
+      body = <Planer tool={tool} />
       break
     case 'sander':
       body = <Sander tool={tool} />

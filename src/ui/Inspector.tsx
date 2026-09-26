@@ -20,6 +20,7 @@ const METHOD_HINT: Record<BuildMethod, string> = {
 const SHAPES: { value: ToolShape; label: string }[] = [
   { value: 'tableSaw', label: 'Table saw' },
   { value: 'thicknesser', label: 'Thicknesser' },
+  { value: 'planer', label: 'Planer-thicknesser' },
   { value: 'sander', label: 'Belt & disc sander' },
   { value: 'mitreSaw', label: 'Mitre saw' },
   { value: 'drillPress', label: 'Drill press' },

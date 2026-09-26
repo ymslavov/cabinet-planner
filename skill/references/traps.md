@@ -58,3 +58,13 @@ Things that cost time. Newest at the bottom. Each entry: symptom → cause → f
   message and an error panel, and the `./start` script. When Y says it isn't loading, first
   check `curl http://127.0.0.1:5188/` and look at the page in Y's Chrome (claude-in-chrome) —
   headless Playwright loads it in < 1 s and hides the slowness.
+
+## Driving Y's browser
+
+- **A browser_batch that Y rejected mid-flight had already run** (2026-09-26): the typing batch
+  for sheet row 14 was "rejected", yet every cell was filled. After any interrupted or rejected
+  browser action, re-read the real state (e.g. export the sheet as xlsx and read it) before
+  retrying — retrying blindly would have typed the row twice.
+- Reading a Google Sheet's formulas: `curl -sL ".../export?format=xlsx"` and open it with
+  openpyxl (scratch venv with `/opt/homebrew/bin/python3.13`) — much faster and exact compared
+  with clicking cells.

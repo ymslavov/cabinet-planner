@@ -41,8 +41,9 @@ zustand vanilla store + `persist`, exposed as `planStore` and the `usePlan(selec
 
 - **Persisted** under localStorage key `cabinet-planner`: settings, tools, cabinets, fixtures,
   and view prefs. **Not persisted**: selection.
-- **Schema version** `SCHEMA_VERSION = 1`. To change the shape: bump it and add a case to
-  `migrate()`. New *settings* keys need no migration — `withDefaults` fills them from
+- **Schema version** `SCHEMA_VERSION = 2`. To change the shape: bump it and add a step to
+  `migrate()`. History: v2 (2026-09-26) adds the HMS 850 tool + "Planer base" cabinet to older
+  saves (only if missing) — seed changes never reach an existing save on their own. New *settings* keys need no migration — `withDefaults` fills them from
   `defaultSettings()` on load and import.
 - **Corrupt save**: `safeStorage` copies an unparseable value to `cabinet-planner.corrupt`
   and starts from the seed — the app never white-screens on bad storage.

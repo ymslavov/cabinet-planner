@@ -1,6 +1,6 @@
 ---
 name: cabinet-planner
-description: Living operating manual for Y's Cabinet Planner — the local web app at ~/projects/cabinet-planner that designs rolling OSB base cabinets for the workshop tools (Bosch GTS 10 XC table saw, Makita 2012NB thicknesser, Scheppach BTS 700 sander, Bosch GCM 8 SJL mitre saw, Bosch PBD 40 drill press), shows them in a 3D shop layout with the outfeed tables, and nests the cut plan onto 7 sheets of 2500x1500x15 OSB-3 plus 30x40 timber. Use this skill whenever the user mentions the cabinet planner, tool cabinets, rolling bases, mobile tool stands, OSB cut plans, sheet nesting, the workshop layout, outfeed tables, the 900 mm work plane, or asks to change, extend, debug or run the app. Also use it AFTER any change to the app, to record what changed — this documentation is meant to be amended continuously, not written once.
+description: Living operating manual for Y's Cabinet Planner — the local web app at ~/projects/cabinet-planner that designs rolling OSB base cabinets for the workshop tools (Bosch GTS 10 XC table saw, Makita 2012NB thicknesser, Scheppach HMS 850 planer-thicknesser, Scheppach BTS 700 sander, Bosch GCM 8 SJL mitre saw, Bosch PBD 40 drill press), shows them in a 3D shop layout with the outfeed tables, and nests the cut plan onto 7 sheets of 2500x1500x15 OSB-3 plus 30x40 timber. Use this skill whenever the user mentions the cabinet planner, tool cabinets, rolling bases, mobile tool stands, OSB cut plans, sheet nesting, the workshop layout, outfeed tables, the 900 mm work plane, or asks to change, extend, debug or run the app. Also use it AFTER any change to the app, to record what changed — this documentation is meant to be amended continuously, not written once.
 ---
 
 # Cabinet Planner — workshop tool cabinets
@@ -61,7 +61,7 @@ store ──▶ sizing ──▶ parts ──┬──▶ 3D layout (src/three)
 
 ## Current state (keep this paragraph true)
 
-As of 2026-09-26: v1 complete on `main` — 78 unit tests, all tasks of
-`docs/plans/2026-09-26-cabinet-planner.md` done. Seed design (five open boxes, timber cleats,
-one shelf each) nests onto **2.8 of 7 sheets** plus **23 m of 30 × 40** (8 × 3 m bars). All tool
+As of 2026-09-26: v1 complete on `main` — 80 unit tests. Six cabinets since the HMS 850
+planer was added (schema v2). Seed design (six open boxes, timber cleats, one shelf each)
+nests onto about **3.6 of 7 sheets**. All tool
 and outfeed dimensions are still sheet estimates — see `roadmap.md` → Waiting on Y.

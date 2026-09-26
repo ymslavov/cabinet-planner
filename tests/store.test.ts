@@ -6,8 +6,8 @@ const fresh = () => createPlanStore(memoryStorage())
 describe('plan store', () => {
   test('starts from the seed', () => {
     const st = fresh().getState()
-    expect(st.cabinets).toHaveLength(5)
-    expect(st.tools).toHaveLength(5)
+    expect(st.cabinets).toHaveLength(6)
+    expect(st.tools).toHaveLength(6)
     expect(st.fixtures).toHaveLength(2)
   })
 
@@ -61,7 +61,7 @@ describe('plan store', () => {
     const storage = memoryStorage({ [STORAGE_KEY]: '{broken' })
     const store = createPlanStore(storage)
     await store.persist.rehydrate()
-    expect(store.getState().cabinets).toHaveLength(5)
+    expect(store.getState().cabinets).toHaveLength(6)
     expect(storage.getItem(`${STORAGE_KEY}.corrupt`)).toBe('{broken')
   })
 
@@ -79,10 +79,27 @@ describe('plan store', () => {
     expect(b.getState().settings.feedLength).toBe(2500)
   })
 
+  test('a v1 save gains the HMS 850 planer and its cabinet on load, once', async () => {
+    const storage = memoryStorage()
+    const a = createPlanStore(storage)
+    a.getState().updateSettings({ kerf: 2.5 })
+    const saved = JSON.parse(storage.getItem(STORAGE_KEY)!)
+    saved.version = 1
+    saved.state.tools = saved.state.tools.filter((t: { id: string }) => t.id !== 'hms850')
+    saved.state.cabinets = saved.state.cabinets.filter((c: { toolId: string }) => c.toolId !== 'hms850')
+    storage.setItem(STORAGE_KEY, JSON.stringify(saved))
+    const b = createPlanStore(storage)
+    await b.persist.rehydrate()
+    const st = b.getState()
+    expect(st.settings.kerf).toBe(2.5)
+    expect(st.tools.filter((t) => t.id === 'hms850')).toHaveLength(1)
+    expect(st.cabinets.filter((c) => c.toolId === 'hms850')).toHaveLength(1)
+  })
+
   test('reset restores the seed', () => {
     const store = fresh()
     store.getState().removeCabinet('cab-gts10')
     store.getState().reset()
-    expect(store.getState().cabinets).toHaveLength(5)
+    expect(store.getState().cabinets).toHaveLength(6)
   })
 })

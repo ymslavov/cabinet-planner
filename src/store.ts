@@ -1,11 +1,11 @@
 import { useStore } from 'zustand'
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware'
 import { createStore } from 'zustand/vanilla'
-import { seedState, defaultSettings } from './engine/seed'
+import { defaultSettings, planerSeed, seedState } from './engine/seed'
 import type { Cabinet, Fixture, PlanState, Rotation, Settings, Tool } from './engine/types'
 
 export const STORAGE_KEY = 'cabinet-planner'
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
 
 export type Selection = { kind: 'cabinet' | 'fixture' | 'tool'; id: string } | { kind: 'settings' } | null
 
@@ -115,10 +115,16 @@ function withDefaults(state: PlanState): PlanState {
   }
 }
 
-/** Upgrade a saved state from an older schema. Add a case per version bump. */
+/** Upgrade a saved state from an older schema. Add a step per version bump. */
 function migrate(state: PlanState, fromVersion: number): PlanState {
-  void fromVersion
-  return withDefaults(state)
+  let st = state
+  if (fromVersion < 2) {
+    // v2: the Scheppach HMS 850 planer joined the workshop (2026-09-26).
+    const { tool, cabinet } = planerSeed()
+    if (!st.tools.some((t) => t.id === tool.id)) st = { ...st, tools: [...st.tools, tool] }
+    if (!st.cabinets.some((c) => c.toolId === tool.id)) st = { ...st, cabinets: [...st.cabinets, cabinet] }
+  }
+  return withDefaults(st)
 }
 
 function nextFreeX(cabinets: Cabinet[], fixtures: Fixture[]): number {

@@ -28,6 +28,7 @@ describe('cabinetDims matches the planning sheet', () => {
     ['2012nb', 530, 420, 710, 580],
     ['bts700', 530, 440, 670, 540],
     ['gcm8', 610, 480, 805, 675],
+    ['hms850', 840, 500, 545, 415],
     ['pbd40', 380, 400, 800, 670],
   ])('%s → %i × %i, surface %i, carcass %i', (id, w, l, surface, carcass) => {
     const d = cabinetDims(cab(id), tool(id), s)
@@ -38,7 +39,7 @@ describe('cabinetDims matches the planning sheet', () => {
   })
 
   test('non-exempt tool decks land on the target plane', () => {
-    for (const id of ['gts10', '2012nb', 'bts700', 'gcm8']) {
+    for (const id of ['gts10', '2012nb', 'bts700', 'gcm8', 'hms850']) {
       expect(cabinetDims(cab(id), tool(id), s).deckTop).toBe(900)
     }
   })
