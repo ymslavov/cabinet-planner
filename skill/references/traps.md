@@ -20,6 +20,9 @@ Things that cost time. Newest at the bottom. Each entry: symptom → cause → f
 - **Debug `console.log` from a vitest test prints nothing** → vitest 5's default reporter
   hides stdout of passing tests → run with `--reporter=verbose` (and `< /dev/null`). Put the
   throwaway test in `tests/_tmp/` via a heredoc and delete it afterwards.
+- **Shallow cleat cabinets were rejected as "too small for its framing"** → the depth guard
+  assumed framing at both ends, but only timber-frame has front framing → guard on the real
+  span `zFront − zRear` (found by the branch review, 2026-09-26).
 - **A `cat > file` without a heredoc in a Bash call hangs forever** waiting on stdin.
 
 ## Tooling (Playwright)

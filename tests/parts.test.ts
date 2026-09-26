@@ -125,6 +125,13 @@ describe('degenerate input', () => {
     expect(partsFor(c)).toEqual([])
   })
 
+  test('a shallow cleat cabinet is still built: only the rear cleat eats into its depth', () => {
+    // 100 deep, osb-cleat: back 15 + rear cleat 45 leaves a 40 mm span for rails and shelves.
+    const c = cab({ toolId: null, shelves: [], overrides: { width: 600, length: 100, surfaceHeight: 900 } })
+    const parts = cabinetParts(c, cabinetDims(c, undefined, s), s)
+    expect(parts.length).toBeGreaterThan(0)
+  })
+
   test('shelves outside the usable height are dropped', () => {
     const parts = partsFor(cab({ shelves: [5, 200, 9999] }))
     expect(byRole(parts, 'shelf')).toHaveLength(1)

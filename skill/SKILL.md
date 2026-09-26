@@ -61,7 +61,7 @@ store ──▶ sizing ──▶ parts ──┬──▶ 3D layout (src/three)
 
 ## Current state (keep this paragraph true)
 
-As of 2026-09-26: v1 complete on `main` — 77 unit tests, all tasks of
+As of 2026-09-26: v1 complete on `main` — 78 unit tests, all tasks of
 `docs/plans/2026-09-26-cabinet-planner.md` done. Seed design (five open boxes, timber cleats,
 one shelf each) nests onto **2.8 of 7 sheets** plus **23 m of 30 × 40** (8 × 3 m bars). All tool
 and outfeed dimensions are still sheet estimates — see `roadmap.md` → Waiting on Y.

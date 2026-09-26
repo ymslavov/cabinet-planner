@@ -40,8 +40,6 @@ export function cabinetParts(cab: Cabinet, dims: CabinetDims, s: Settings): Part
   const { width: W, length: L, t, casterHeight: y0, carcassHeight: H } = dims
   const { ca, cb, material: cleatMaterial } = framing(s, cab.method)
   const innerH = H - t
-  if (H <= 0 || innerH < 2 * cb + 1 || W - 2 * t - 2 * cb <= 0 || L - t - 2 * ca <= 0) return []
-
   const frame = cab.method === 'timber-frame'
   const rearFraming = cab.hasBack || frame
   const yFloor = y0 + t
@@ -50,6 +48,8 @@ export function cabinetParts(cab: Cabinet, dims: CabinetDims, s: Settings): Part
   const zRear = zBack + (rearFraming ? ca : 0) // where side rails and shelves start
   const zFront = L / 2 - (frame ? ca : 0) // where side rails and shelves end
   const xIn = W / 2 - t // inside face of the sides
+  // Guard on the real spans: only timber-frame has framing at the front.
+  if (H <= 0 || innerH < 2 * cb + 1 || 2 * xIn - 2 * cb <= 0 || zFront - zRear <= 0) return []
 
   const parts: Part[] = []
   const add = (key: string, label: string, role: PartRole, box: Box, material: 'osb' | 'timber' = 'osb') => {

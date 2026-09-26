@@ -64,7 +64,9 @@ bottom rail and it must clear the top rail. Out-of-range shelves are dropped (ch
 ## Degenerate cabinets
 
 No parts when the carcass is ≤ 0, too short for top and bottom rails (`H − t < 2·cb + 1`),
-or too narrow/shallow for the framing. The checks report why.
+too narrow for the back rails (`W − 2t − 2·cb ≤ 0`), or with no depth left between the rear
+framing and the front (`zFront − zRear ≤ 0` — only timber-frame has framing at the front).
+The checks report why.
 
 ## Worked example — table saw base, timber-frame, one shelf at 200
 
