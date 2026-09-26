@@ -30,6 +30,7 @@ Read this file for orientation, then only the reference you need:
 | `references/app.md` | Running the app, UI map, data model, persistence, export/import, 3D view, cut plan tab |
 | `references/traps.md` | Anything that bit us — read before debugging |
 | `references/roadmap.md` | What's waiting on Y's measurements, what's built, ideas not yet built |
+| `references/private.md` | **Local only, git-ignored**: the planning sheet's ID and how to read/edit it. The repo is public — anything private goes here, never in a tracked file |
 
 ## Shape in one paragraph
 

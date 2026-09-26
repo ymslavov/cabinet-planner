@@ -3,3 +3,4 @@ dist
 *.tsbuildinfo
 .DS_Store
 shots/
+skill/references/private.md
