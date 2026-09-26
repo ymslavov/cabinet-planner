@@ -27,8 +27,9 @@ Read this file for orientation, then only the reference you need:
 | `references/workshop.md` | The real-world facts: tools, stock, outfeed tables, what is measured vs estimated |
 | `references/construction.md` | How a cabinet is built — OSB rules, the three build methods, every part and why |
 | `references/engine.md` | Sizing formulas, part generator, nester, timber packer, checks — the maths |
-| `references/app.md` | Running the app, UI map, data model, persistence, export/import |
+| `references/app.md` | Running the app, UI map, data model, persistence, export/import, 3D view, cut plan tab |
 | `references/traps.md` | Anything that bit us — read before debugging |
+| `references/roadmap.md` | What's waiting on Y's measurements, what's built, ideas not yet built |
 
 ## Shape in one paragraph
 
@@ -45,3 +46,22 @@ store ──▶ sizing ──▶ parts ──┬──▶ 3D layout (src/three)
                              ├──▶ nest (OSB sheets) ──┐
                              └──▶ timber (1D bars) ───┴──▶ budget + checks ──▶ UI
 ```
+
+## Changing the app — the loop
+
+1. Read the reference for the area you're touching (and `traps.md`).
+2. Engine changes: write/adjust the vitest case first (`tests/*.test.ts`), then the code.
+   `npm test` must pass. The sheet's rows in `tests/sizing.test.ts` are the ground truth.
+3. UI changes: run `npm run dev` and `npm run shot <name> [--click=…] [--tab=cut]`, then
+   *look at the PNG in `shots/`* before claiming it works.
+4. `npx tsc -b` clean.
+5. **Update this skill in the same commit**: the reference for the area, `traps.md` for
+   anything that bit you, `roadmap.md` for status, `workshop.md` for real-world facts.
+6. One atomic commit per feature, message says what and why (and the trap, if any).
+
+## Current state (keep this paragraph true)
+
+As of 2026-09-26: v1 complete on `main` — 77 unit tests, all tasks of
+`docs/plans/2026-09-26-cabinet-planner.md` done. Seed design (five open boxes, timber cleats,
+one shelf each) nests onto **2.8 of 7 sheets** plus **23 m of 30 × 40** (8 × 3 m bars). All tool
+and outfeed dimensions are still sheet estimates — see `roadmap.md` → Waiting on Y.
